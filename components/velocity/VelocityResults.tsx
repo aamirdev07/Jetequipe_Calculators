@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Stack, Grid, Chip, Alert, Typography, Paper } from '@mui/material';
+import { Stack, Grid, Chip, Alert, Typography, Paper, alpha } from '@mui/material';
 import { VelocityOutputs } from '@/lib/types';
+
+const ACCENT = '#00A859';
 
 interface VelocityResultsProps {
   outputs: VelocityOutputs;
@@ -23,52 +25,57 @@ export default function VelocityResults({ outputs }: VelocityResultsProps) {
 
   const cipMessage =
     outputs.cipStatus === 'in-range'
-      ? 'Velocity is within the recommended CIP range (5–7 ft/s)'
+      ? 'Within CIP range (5–7 ft/s)'
       : outputs.cipStatus === 'below'
-      ? 'Velocity is below the CIP minimum of 5 ft/s'
-      : 'Velocity exceeds the CIP maximum of 7 ft/s';
+      ? 'Below CIP minimum (5 ft/s)'
+      : 'Exceeds CIP maximum (7 ft/s)';
 
   return (
     <Stack spacing={2}>
-      {/* Main velocity display */}
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Typography variant="overline" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block' }}>
+      <Paper
+        sx={{
+          p: 2.5,
+          bgcolor: alpha(ACCENT, 0.04),
+          border: `1px solid ${alpha(ACCENT, 0.15)}`,
+          borderRadius: 0,
+        }}
+      >
+        <Typography variant="caption" color="text.secondary" fontWeight={500} textTransform="uppercase" letterSpacing={0.5} sx={{ mb: 1.5, display: 'block', fontSize: '0.65rem' }}>
           Fluid Velocity
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={6}>
-            <Typography variant="h3" fontWeight={700} color="primary.main">
+            <Typography variant="h4" fontWeight={700} color={ACCENT} sx={{ fontSize: '1.75rem' }}>
               {outputs.velocityMs.toFixed(2)}
             </Typography>
-            <Typography variant="body1" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500}>
               m/s
             </Typography>
           </Grid>
           <Grid item xs={6}>
-            <Typography variant="h3" fontWeight={700} color="primary.main">
+            <Typography variant="h4" fontWeight={700} color={ACCENT} sx={{ fontSize: '1.75rem' }}>
               {outputs.velocityFts.toFixed(2)}
             </Typography>
-            <Typography variant="body1" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500}>
               ft/s
             </Typography>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* CIP Indicator */}
       <Alert
         severity={chipColor === 'success' ? 'success' : chipColor === 'warning' ? 'warning' : 'error'}
         icon={false}
-        sx={{ alignItems: 'center' }}
+        sx={{ alignItems: 'center', py: 1 }}
       >
-        <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack direction="row" alignItems="center" spacing={1}>
           <Chip
             label={outputs.cipLabel}
             color={chipColor}
             size="small"
-            sx={{ fontWeight: 700 }}
+            sx={{ fontWeight: 700, height: 24 }}
           />
-          <Typography variant="body2" fontWeight={500}>
+          <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.8rem' }}>
             {cipMessage}
           </Typography>
         </Stack>

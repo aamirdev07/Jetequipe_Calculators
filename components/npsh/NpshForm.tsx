@@ -122,7 +122,7 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
       <Grid container spacing={1.5}>
         <Grid item xs={12}>
           <InputField
-            label={`Static Height (\u0394z)`}
+            label="Static Height (Δz)"
             value={inputs.staticHeight}
             onChange={(v) => onChange({ ...inputs, staticHeight: v })}
             unit={lenUnit}

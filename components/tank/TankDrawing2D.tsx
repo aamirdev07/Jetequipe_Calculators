@@ -21,7 +21,7 @@ export default function TankDrawing2D({ outputs, innerDiameter, unitSystem }: Ta
           alignItems: 'center',
           justifyContent: 'center',
           bgcolor: '#F8FAFC',
-          borderRadius: 2,
+          borderRadius: 0,
           border: '1px dashed',
           borderColor: 'divider',
         }}

@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Stack, Grid, Chip, Alert, Typography, Paper } from '@mui/material';
+import { Stack, Chip, Alert, Typography, Paper, alpha } from '@mui/material';
 import { NpshOutputs, UnitSystem } from '@/lib/types';
+
+const ACCENT = '#E65100';
 
 interface NpshResultsProps {
   outputs: NpshOutputs;
@@ -23,29 +25,39 @@ export default function NpshResults({ outputs, unitSystem }: NpshResultsProps) {
     outputs.riskLevel === 'adequate' ? 'success' :
     outputs.riskLevel === 'low' ? 'warning' : 'error';
 
+  const resultColor =
+    outputs.riskLevel === 'adequate' ? '#2E7D32' :
+    outputs.riskLevel === 'low' ? '#ED6C02' : '#D32F2F';
+
   return (
     <Stack spacing={2}>
-      {/* Main NPSHa result */}
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Typography variant="overline" color="text.secondary" fontWeight={600} sx={{ display: 'block' }}>
+      <Paper
+        sx={{
+          p: 2.5,
+          bgcolor: alpha(resultColor, 0.04),
+          border: `1px solid ${alpha(resultColor, 0.15)}`,
+          borderRadius: 0,
+        }}
+      >
+        <Typography variant="caption" color="text.secondary" fontWeight={500} textTransform="uppercase" letterSpacing={0.5} sx={{ display: 'block', fontSize: '0.65rem' }}>
           NPSHa (Net Positive Suction Head Available)
         </Typography>
-        <Typography variant="h3" fontWeight={700} color={`${chipColor}.main`} sx={{ my: 1 }}>
+        <Typography variant="h4" fontWeight={700} sx={{ my: 0.75, fontSize: '1.75rem', color: resultColor }}>
           {outputs.npsha.toFixed(2)} {unit}
         </Typography>
         <Chip
           label={outputs.riskLabel}
           color={chipColor}
-          sx={{ fontWeight: 600 }}
+          size="small"
+          sx={{ fontWeight: 600, height: 24 }}
         />
       </Paper>
 
-      {/* Breakdown */}
       <Paper variant="outlined" sx={{ p: 2 }}>
-        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+        <Typography variant="caption" fontWeight={600} textTransform="uppercase" letterSpacing={0.5} color="text.secondary" sx={{ display: 'block', mb: 1.5, fontSize: '0.65rem' }}>
           Calculation Breakdown
         </Typography>
-        <Stack spacing={1}>
+        <Stack spacing={0.75}>
           <BreakdownRow
             sign="+"
             label="Atmospheric pressure head (ha)"
@@ -60,7 +72,7 @@ export default function NpshResults({ outputs, unitSystem }: NpshResultsProps) {
           />
           <BreakdownRow
             sign={outputs.staticHead >= 0 ? '+' : '−'}
-            label={'Static head (Δz)'}
+            label="Static head (Δz)"
             value={Math.abs(outputs.staticHead)}
             unit={unit}
             note={outputs.staticHead >= 0 ? 'flooded suction' : 'suction lift'}
@@ -83,10 +95,10 @@ export default function NpshResults({ outputs, unitSystem }: NpshResultsProps) {
             alignItems="center"
             sx={{ pt: 1, mt: 0.5, borderTop: '2px solid', borderColor: 'divider' }}
           >
-            <Typography variant="body2" fontWeight={700}>
+            <Typography variant="body2" fontWeight={700} sx={{ fontSize: '0.85rem' }}>
               = NPSHa
             </Typography>
-            <Typography variant="body1" fontWeight={700} color={`${chipColor}.main`}>
+            <Typography variant="body2" fontWeight={700} sx={{ fontSize: '0.85rem', color: resultColor }}>
               {outputs.npsha.toFixed(2)} {unit}
             </Typography>
           </Stack>
@@ -110,26 +122,26 @@ function BreakdownRow({
   note?: string;
 }) {
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center">
-      <Stack direction="row" alignItems="center" spacing={1}>
+    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.25 }}>
+      <Stack direction="row" alignItems="center" spacing={0.75}>
         <Typography
           variant="body2"
           fontWeight={700}
           color={sign === '+' ? 'success.main' : 'error.main'}
-          sx={{ width: 16, textAlign: 'center' }}
+          sx={{ width: 14, textAlign: 'center', fontSize: '0.85rem' }}
         >
           {sign}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
           {label}
           {note && (
-            <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+            <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5, fontSize: '0.7rem' }}>
               ({note})
             </Typography>
           )}
         </Typography>
       </Stack>
-      <Typography variant="body2" fontWeight={600}>
+      <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.8rem' }}>
         {value.toFixed(2)} {unit}
       </Typography>
     </Stack>

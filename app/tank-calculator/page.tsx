@@ -6,80 +6,114 @@ import {
   Typography,
   Grid,
   Paper,
-  Breadcrumbs,
+  Stack,
+  alpha,
 } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
-import Link from 'next/link';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import PropaneTankIcon from '@mui/icons-material/PropaneTank';
 import TankForm, { TANK_DEFAULTS_METRIC } from '@/components/tank/TankForm';
 import TankResults from '@/components/tank/TankResults';
 import TankDrawing2D from '@/components/tank/TankDrawing2D';
+import CalcPageHeader from '@/components/shared/CalcPageHeader';
+import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
 import { TankInputs } from '@/lib/types';
 import { calculateTank } from '@/lib/calculations/tank';
+import { FadeInView } from '@/components/shared/MotionWrapper';
 
-const pageSx: SxProps<Theme> = { py: { xs: 2, md: 4 } };
+const ACCENT = '#0072CE';
 
 export default function TankCalculatorPage() {
   const [inputs, setInputs] = useState<TankInputs>(TANK_DEFAULTS_METRIC);
-
   const outputs = useMemo(() => calculateTank(inputs), [inputs]);
 
+  const unit = inputs.unitSystem === 'metric' ? 'mm' : 'in';
+  const volUnit = inputs.unitSystem === 'metric' ? 'L' : 'gal';
+
+  const exportRows: ExportRow[] = useMemo(() => {
+    if (outputs.error) return [];
+    return [
+      { label: 'Unit System', value: inputs.unitSystem },
+      { label: 'Inner Diameter', value: `${inputs.innerDiameter} ${unit}` },
+      { label: 'Working Volume', value: `${inputs.workingVolume} ${volUnit}` },
+      { label: 'Cone Angle', value: `${inputs.coneAngle}°` },
+      { label: 'Cylinder Height', value: `${outputs.cylinderHeight} ${unit}` },
+      { label: 'Cone Height', value: `${outputs.coneHeight} ${unit}` },
+      { label: 'Total Height', value: `${outputs.totalHeight} ${unit}` },
+      { label: 'H/D Ratio', value: outputs.hdRatio.toFixed(2) },
+      { label: 'Total Volume', value: `${outputs.totalVolume.toFixed(1)} ${volUnit}` },
+      { label: 'Total Volume (m³)', value: outputs.totalVolumeM3.toFixed(4) },
+    ];
+  }, [inputs, outputs, unit, volUnit]);
+
   return (
-    <Container maxWidth="lg" sx={pageSx}>
-      <Breadcrumbs
-        separator={<NavigateNextIcon fontSize="small" />}
-        sx={{ mb: 2 }}
-      >
-        <Link href="/" style={{ textDecoration: 'none', color: '#5A6A7A' }}>
-          Calculators
-        </Link>
-        <Typography color="text.primary" fontWeight={600} variant="body2">
-          Tank Dimensions
-        </Typography>
-      </Breadcrumbs>
+    <>
+      <CalcPageHeader
+        title="Tank Dimension Calculator"
+        subtitle="Vertical conical-bottom tank with flat lid — real-time geometry calculations"
+        breadcrumbLabel="Tank Dimensions"
+        accentColor={ACCENT}
+        icon={<PropaneTankIcon sx={{ fontSize: 22 }} />}
+      />
 
-      <Typography
-        variant="h5"
-        component="h1"
-        gutterBottom
-        sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
-      >
-        Tank Dimension Calculator
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Vertical conical-bottom tank with flat lid. Adjust parameters to see real-time results.
-      </Typography>
+      <Container maxWidth="lg" sx={{ py: { xs: 2.5, md: 3.5 } }}>
+        <Grid container spacing={{ xs: 2, md: 3 }}>
+          <Grid item xs={12} md={5}>
+            <FadeInView delay={0.05}>
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <SectionLabel color={ACCENT}>Inputs</SectionLabel>
+                <TankForm inputs={inputs} onChange={setInputs} />
+              </Paper>
+            </FadeInView>
 
-      <Grid container spacing={{ xs: 2, md: 3 }}>
-        <Grid item xs={12} md={5}>
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, mb: { xs: 2, md: 0 } }}>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-              Inputs
-            </Typography>
-            <TankForm inputs={inputs} onChange={setInputs} />
-          </Paper>
+            <FadeInView delay={0.1}>
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mt: 2.5 }}>
+                <SectionLabel color="#00A859">Results</SectionLabel>
+                <TankResults outputs={outputs} unitSystem={inputs.unitSystem} />
+                {!outputs.error && (
+                  <ExportBar title="Tank Dimension Calculator" rows={exportRows} accentColor={ACCENT} />
+                )}
+              </Paper>
+            </FadeInView>
+          </Grid>
 
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, mt: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-              Results
-            </Typography>
-            <TankResults outputs={outputs} unitSystem={inputs.unitSystem} />
-          </Paper>
+          <Grid item xs={12} md={7}>
+            <FadeInView delay={0.15}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: { xs: 2, sm: 2.5 },
+                  position: 'sticky',
+                  top: 64,
+                }}
+              >
+                <SectionLabel color={ACCENT}>Tank Profile</SectionLabel>
+                <TankDrawing2D
+                  outputs={outputs}
+                  innerDiameter={inputs.innerDiameter}
+                  unitSystem={inputs.unitSystem}
+                />
+              </Paper>
+            </FadeInView>
+          </Grid>
         </Grid>
+      </Container>
+    </>
+  );
+}
 
-        <Grid item xs={12} md={7}>
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-              Tank Profile
-            </Typography>
-            <TankDrawing2D
-              outputs={outputs}
-              innerDiameter={inputs.innerDiameter}
-              unitSystem={inputs.unitSystem}
-            />
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+function SectionLabel({ children, color }: { children: React.ReactNode; color: string }) {
+  return (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+      <Stack
+        sx={{
+          width: 4,
+          height: 18,
+          borderRadius: 0,
+          bgcolor: color,
+        }}
+      />
+      <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: '0.85rem', color }}>
+        {children}
+      </Typography>
+    </Stack>
   );
 }

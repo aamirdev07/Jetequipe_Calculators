@@ -7,112 +7,388 @@ import {
   Grid,
   Card,
   CardContent,
-  CardActions,
   Button,
   Stack,
+  Chip,
+  Paper,
+  alpha,
 } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OpacityIcon from '@mui/icons-material/Opacity';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import PropaneTankIcon from '@mui/icons-material/PropaneTank';
+import CalculateIcon from '@mui/icons-material/Calculate';
+import SyncAltIcon from '@mui/icons-material/SyncAlt';
+import BoltIcon from '@mui/icons-material/Bolt';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { FadeIn, FadeInView, StaggerContainer, StaggerItem } from '@/components/shared/MotionWrapper';
 
 interface CalculatorCard {
   title: string;
   description: string;
   icon: React.ReactNode;
   link: string;
+  tag: string;
+  tagColor: string;
+  accentColor: string;
 }
 
 const calculators: CalculatorCard[] = [
   {
     title: 'Tank Dimensions',
     description:
-      'Vertical conical-bottom tank geometry — cylinder height, total height, H/D ratio, and 2D profile drawing.',
-    icon: <PropaneTankIcon sx={{ fontSize: 24, color: 'primary.main' }} />,
+      'Calculate vertical conical-bottom tank geometry — cylinder height, total height, H/D ratio with interactive 2D profile drawing.',
+    icon: <PropaneTankIcon sx={{ fontSize: 26 }} />,
     link: '/tank-calculator',
+    tag: 'Geometry',
+    tagColor: '#0072CE',
+    accentColor: '#0072CE',
   },
   {
     title: 'Friction Loss',
     description:
-      'Darcy-Weisbach pressure and head loss — major losses, minor losses from fittings, elevation, and additional losses.',
-    icon: <StraightenIcon sx={{ fontSize: 24, color: 'primary.main' }} />,
+      'Darcy-Weisbach pipe friction with Swamee-Jain friction factor. Includes major, minor (K-method), elevation, and additional losses.',
+    icon: <StraightenIcon sx={{ fontSize: 26 }} />,
     link: '/friction-loss',
+    tag: 'Hydraulics',
+    tagColor: '#7C3AED',
+    accentColor: '#7C3AED',
   },
   {
     title: 'Fluid Velocity',
     description:
-      'Velocity from flow rate and pipe diameter in m/s and ft/s, with CIP range indicator (5–7 ft/s).',
-    icon: <SpeedIcon sx={{ fontSize: 24, color: 'primary.main' }} />,
+      'Convert flow rate to velocity for any pipe diameter. Includes CIP velocity range indicator (5–7 ft/s) for sanitary validation.',
+    icon: <SpeedIcon sx={{ fontSize: 26 }} />,
     link: '/fluid-velocity',
+    tag: 'Flow',
+    tagColor: '#00A859',
+    accentColor: '#00A859',
   },
   {
     title: 'NPSH Available',
     description:
-      'Net Positive Suction Head Available to verify suction conditions and avoid cavitation.',
-    icon: <OpacityIcon sx={{ fontSize: 24, color: 'primary.main' }} />,
+      'Verify suction conditions and prevent pump cavitation. Full breakdown of atmospheric, static, friction, and vapor pressure heads.',
+    icon: <OpacityIcon sx={{ fontSize: 26 }} />,
     link: '/npsh-calculator',
+    tag: 'Pump',
+    tagColor: '#E65100',
+    accentColor: '#E65100',
   },
 ];
 
-const containerSx: SxProps<Theme> = { py: { xs: 3, md: 5 } };
-const cardSx: SxProps<Theme> = {
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-};
+const features = [
+  {
+    icon: <BoltIcon sx={{ fontSize: 20, color: '#0072CE' }} />,
+    title: 'Instant results',
+    description: 'Real-time calculations as you type',
+  },
+  {
+    icon: <SyncAltIcon sx={{ fontSize: 20, color: '#00A859' }} />,
+    title: 'Metric & Imperial',
+    description: 'Switch units with one click',
+  },
+  {
+    icon: <CalculateIcon sx={{ fontSize: 20, color: '#7C3AED' }} />,
+    title: 'Industry formulas',
+    description: 'Darcy-Weisbach, Swamee-Jain, NPSHa',
+  },
+  {
+    icon: <VerifiedIcon sx={{ fontSize: 20, color: '#E65100' }} />,
+    title: 'Sanitary standards',
+    description: 'Built for 3-A & ASME BPE',
+  },
+];
 
 export default function HomePage() {
   return (
-    <Container maxWidth="md" sx={containerSx}>
-      <Stack sx={{ mb: 4 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          fontWeight={700}
-          gutterBottom
-          sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
-        >
-          Engineering Calculators
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 520 }}>
-          Process engineering tools for the sanitary and aseptic processing industry.
-        </Typography>
+    <>
+      {/* Hero Section */}
+      <Stack
+        sx={{
+          background: 'linear-gradient(135deg, #0072CE 0%, #004F8F 60%, #003366 100%)',
+          color: '#fff',
+          py: { xs: 5, md: 7 },
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Subtle decorative shapes */}
+        <Stack
+          sx={{
+            position: 'absolute',
+            top: -80,
+            right: -80,
+            width: 280,
+            height: 280,
+            background: 'rgba(255,255,255,0.04)',
+            transform: 'rotate(45deg)',
+          }}
+        />
+        <Stack
+          sx={{
+            position: 'absolute',
+            bottom: -60,
+            left: '30%',
+            width: 200,
+            height: 200,
+            background: 'rgba(255,255,255,0.03)',
+            transform: 'rotate(15deg)',
+          }}
+        />
+
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <FadeIn duration={0.6}>
+            <Chip
+              label="Jetequip Process Solutions"
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.15)',
+                color: 'rgba(255,255,255,0.9)',
+                fontWeight: 600,
+                fontSize: '0.72rem',
+                mb: 2.5,
+                backdropFilter: 'blur(4px)',
+                height: 28,
+              }}
+            />
+            <Typography
+              variant="h3"
+              component="h1"
+              sx={{
+                fontWeight: 800,
+                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+                lineHeight: 1.15,
+                mb: 2,
+                maxWidth: 560,
+              }}
+            >
+              Engineering Calculators for Process Engineers
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: 'rgba(255,255,255,0.75)',
+                maxWidth: 480,
+                mb: 3.5,
+                fontSize: { xs: '0.9rem', md: '1rem' },
+                lineHeight: 1.6,
+              }}
+            >
+              Free, accurate tools for pipe sizing, tank design, friction loss, and pump suction analysis — purpose-built for sanitary and aseptic processing.
+            </Typography>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Button
+                variant="contained"
+                href="#calculators"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                sx={{
+                  bgcolor: '#00A859',
+                  fontWeight: 700,
+                  px: 3,
+                  py: 1.2,
+                  fontSize: '0.9rem',
+                  '&:hover': {
+                    bgcolor: '#00753E',
+                    boxShadow: '0 4px 14px rgba(0, 168, 89, 0.4)',
+                  },
+                }}
+              >
+                Get started
+              </Button>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                4 calculators available
+              </Typography>
+            </Stack>
+          </FadeIn>
+        </Container>
       </Stack>
 
-      <Grid container spacing={2}>
-        {calculators.map((calc) => (
-          <Grid item xs={12} sm={6} key={calc.link}>
-            <Link href={calc.link} passHref style={{ textDecoration: 'none' }}>
-              <Card variant="outlined" sx={cardSx}>
-                <CardContent sx={{ flex: 1, p: { xs: 2, sm: 2.5 } }}>
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-                    {calc.icon}
-                    <Typography variant="subtitle1" component="h2" fontWeight={600}>
-                      {calc.title}
-                    </Typography>
+      {/* Features strip */}
+      <Stack
+        sx={{
+          bgcolor: '#fff',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          py: { xs: 2.5, md: 3 },
+        }}
+      >
+        <Container maxWidth="md">
+          <FadeInView delay={0.1}>
+            <Grid container spacing={{ xs: 2, md: 3 }}>
+              {features.map((f) => (
+                <Grid item xs={6} md={3} key={f.title}>
+                  <Stack direction="row" alignItems="flex-start" spacing={1.25}>
+                    <Stack
+                      alignItems="center"
+                      justifyContent="center"
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 0,
+                        bgcolor: alpha(f.icon.props.sx.color, 0.08),
+                        flexShrink: 0,
+                      }}
+                    >
+                      {f.icon}
+                    </Stack>
+                    <Stack>
+                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.8rem', lineHeight: 1.3 }}>
+                        {f.title}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', lineHeight: 1.4 }}>
+                        {f.description}
+                      </Typography>
+                    </Stack>
                   </Stack>
-                  <Typography variant="body2" color="text.secondary">
-                    {calc.description}
-                  </Typography>
-                </CardContent>
-                <CardActions sx={{ px: { xs: 2, sm: 2.5 }, pb: 2 }}>
-                  <Button
-                    variant="contained"
-                    disableElevation
-                    endIcon={<ArrowForwardIcon fontSize="small" />}
-                    size="small"
-                  >
-                    Open
-                  </Button>
-                </CardActions>
-              </Card>
-            </Link>
+                </Grid>
+              ))}
+            </Grid>
+          </FadeInView>
+        </Container>
+      </Stack>
+
+      {/* Calculator Cards */}
+      <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 } }} id="calculators">
+        <FadeInView>
+          <Stack sx={{ mb: { xs: 3, md: 4 } }}>
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              sx={{ fontSize: { xs: '1.2rem', md: '1.4rem' }, mb: 0.5 }}
+            >
+              Choose a calculator
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Select a tool below to start computing.
+            </Typography>
+          </Stack>
+        </FadeInView>
+
+        <StaggerContainer>
+          <Grid container spacing={2.5}>
+            {calculators.map((calc) => (
+              <Grid item xs={12} sm={6} key={calc.link}>
+                <StaggerItem>
+                  <Link href={calc.link} passHref style={{ textDecoration: 'none' }}>
+                    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2, ease: 'easeOut' }}>
+                      <Card
+                        variant="outlined"
+                        sx={{
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          cursor: 'pointer',
+                          overflow: 'visible',
+                          position: 'relative',
+                        }}
+                      >
+                        {/* Colored top accent */}
+                        <Stack
+                          sx={{
+                            height: 4,
+                            borderRadius: 0,
+                            bgcolor: calc.accentColor,
+                            mx: -0.125,
+                            mt: -0.125,
+                          }}
+                        />
+                        <CardContent sx={{ flex: 1, p: { xs: 2.5, sm: 3 }, pt: { xs: 2, sm: 2.5 } }}>
+                          <Stack direction="row" alignItems="flex-start" spacing={1.5} sx={{ mb: 1.5 }}>
+                            <Stack
+                              alignItems="center"
+                              justifyContent="center"
+                              sx={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 0,
+                                bgcolor: alpha(calc.accentColor, 0.1),
+                                color: calc.accentColor,
+                                flexShrink: 0,
+                              }}
+                            >
+                              {calc.icon}
+                            </Stack>
+                            <Stack sx={{ flex: 1, minWidth: 0 }}>
+                              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.25 }}>
+                                <Typography variant="subtitle1" component="h2" fontWeight={700} sx={{ fontSize: '1rem' }}>
+                                  {calc.title}
+                                </Typography>
+                                <Chip
+                                  label={calc.tag}
+                                  size="small"
+                                  sx={{
+                                    height: 20,
+                                    fontSize: '0.65rem',
+                                    fontWeight: 600,
+                                    bgcolor: alpha(calc.tagColor, 0.08),
+                                    color: calc.tagColor,
+                                  }}
+                                />
+                              </Stack>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ fontSize: '0.8rem', lineHeight: 1.55 }}
+                              >
+                                {calc.description}
+                              </Typography>
+                            </Stack>
+                          </Stack>
+                          <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
+                            <Button
+                              variant="text"
+                              size="small"
+                              endIcon={<ArrowForwardIcon sx={{ fontSize: '14px !important' }} />}
+                              sx={{
+                                fontSize: '0.8rem',
+                                color: calc.accentColor,
+                                fontWeight: 600,
+                                '&:hover': { bgcolor: alpha(calc.accentColor, 0.06) },
+                              }}
+                            >
+                              Open
+                            </Button>
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </Link>
+                </StaggerItem>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-    </Container>
+        </StaggerContainer>
+      </Container>
+
+      {/* Bottom CTA */}
+      <Stack sx={{ bgcolor: '#fff', py: { xs: 4, md: 5 }, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Container maxWidth="sm">
+          <FadeInView>
+            <Stack alignItems="center" textAlign="center" spacing={2}>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1rem', md: '1.15rem' } }}>
+                Need custom process solutions?
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 380 }}>
+                Jetequip designs and fabricates sanitary process equipment for food, beverage, dairy, pharma, and biotech industries.
+              </Typography>
+              <Button
+                variant="outlined"
+                color="primary"
+                href="https://jetequip.com/en/"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ fontWeight: 600 }}
+              >
+                Visit jetequip.com
+              </Button>
+            </Stack>
+          </FadeInView>
+        </Container>
+      </Stack>
+    </>
   );
 }

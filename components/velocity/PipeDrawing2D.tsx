@@ -21,7 +21,7 @@ export default function PipeDrawing2D({ diameterMm, velocityMs, diameterUnit, di
           alignItems: 'center',
           justifyContent: 'center',
           bgcolor: '#F8FAFC',
-          borderRadius: 2,
+          borderRadius: 0,
           border: '1px dashed',
           borderColor: 'divider',
         }}
@@ -141,7 +141,7 @@ export default function PipeDrawing2D({ diameterMm, velocityMs, diameterUnit, di
           fontSize="10"
           fontFamily="Inter, sans-serif"
         >
-          Flow direction \u2192
+          Flow direction →
         </text>
       </svg>
     </Box>

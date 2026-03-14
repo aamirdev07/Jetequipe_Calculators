@@ -6,22 +6,22 @@ import {
   Typography,
   Grid,
   Paper,
-  Breadcrumbs,
+  Stack,
 } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
-import Link from 'next/link';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import SpeedIcon from '@mui/icons-material/Speed';
 import VelocityForm, { VELOCITY_DEFAULTS } from '@/components/velocity/VelocityForm';
 import VelocityResults from '@/components/velocity/VelocityResults';
 import PipeDrawing2D from '@/components/velocity/PipeDrawing2D';
+import CalcPageHeader from '@/components/shared/CalcPageHeader';
+import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
 import { VelocityInputs } from '@/lib/types';
 import { calculateFluidVelocity } from '@/lib/calculations/fluidVelocity';
+import { FadeInView } from '@/components/shared/MotionWrapper';
 
-const pageSx: SxProps<Theme> = { py: { xs: 2, md: 4 } };
+const ACCENT = '#00A859';
 
 export default function FluidVelocityPage() {
   const [inputs, setInputs] = useState<VelocityInputs>(VELOCITY_DEFAULTS);
-
   const outputs = useMemo(() => calculateFluidVelocity(inputs), [inputs]);
 
   const diameterMm =
@@ -29,63 +29,82 @@ export default function FluidVelocityPage() {
       ? inputs.pipeDiameter
       : inputs.pipeDiameter * 25.4;
 
+  const flowUnitMap: Record<string, string> = { m3h: 'm³/h', Lmin: 'L/min', Ls: 'L/s', GPM: 'GPM' };
+
+  const exportRows: ExportRow[] = useMemo(() => {
+    if (outputs.error) return [];
+    return [
+      { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit]}` },
+      { label: 'Pipe Diameter', value: `${inputs.pipeDiameter} ${inputs.pipeDiameterUnit}` },
+      { label: 'Velocity', value: `${outputs.velocityMs.toFixed(2)} m/s (${outputs.velocityFts.toFixed(2)} ft/s)` },
+      { label: 'CIP Status', value: outputs.cipLabel },
+    ];
+  }, [inputs, outputs]);
+
   return (
-    <Container maxWidth="lg" sx={pageSx}>
-      <Breadcrumbs
-        separator={<NavigateNextIcon fontSize="small" />}
-        sx={{ mb: 2 }}
-      >
-        <Link href="/" style={{ textDecoration: 'none', color: '#5A6A7A' }}>
-          Calculators
-        </Link>
-        <Typography color="text.primary" fontWeight={600} variant="body2">
-          Fluid Velocity
-        </Typography>
-      </Breadcrumbs>
+    <>
+      <CalcPageHeader
+        title="Fluid Velocity in Pipe"
+        subtitle="Flow rate to velocity with CIP range validation (5–7 ft/s)"
+        breadcrumbLabel="Fluid Velocity"
+        accentColor={ACCENT}
+        icon={<SpeedIcon sx={{ fontSize: 22 }} />}
+      />
 
-      <Typography
-        variant="h5"
-        component="h1"
-        gutterBottom
-        sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
-      >
-        Fluid Velocity in Pipe
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Compute velocity from flow rate and pipe diameter with CIP range validation (5–7 ft/s).
-      </Typography>
+      <Container maxWidth="lg" sx={{ py: { xs: 2.5, md: 3.5 } }}>
+        <Grid container spacing={{ xs: 2, md: 3 }}>
+          <Grid item xs={12} md={5}>
+            <FadeInView delay={0.05}>
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <SectionLabel color={ACCENT}>Inputs</SectionLabel>
+                <VelocityForm inputs={inputs} onChange={setInputs} />
+              </Paper>
+            </FadeInView>
+          </Grid>
 
-      <Grid container spacing={{ xs: 2, md: 3 }}>
-        <Grid item xs={12} md={5}>
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-              Inputs
-            </Typography>
-            <VelocityForm inputs={inputs} onChange={setInputs} />
-          </Paper>
+          <Grid item xs={12} md={7}>
+            <FadeInView delay={0.1}>
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5 }}>
+                <SectionLabel color={ACCENT}>Results</SectionLabel>
+                <VelocityResults outputs={outputs} />
+                {!outputs.error && (
+                  <ExportBar title="Fluid Velocity Calculator" rows={exportRows} accentColor={ACCENT} />
+                )}
+              </Paper>
+            </FadeInView>
+
+            <FadeInView delay={0.15}>
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <SectionLabel color="#0072CE">Pipe Diagram</SectionLabel>
+                <PipeDrawing2D
+                  diameterMm={diameterMm}
+                  velocityMs={outputs.velocityMs}
+                  diameterUnit={inputs.pipeDiameterUnit}
+                  diameterValue={inputs.pipeDiameter}
+                />
+              </Paper>
+            </FadeInView>
+          </Grid>
         </Grid>
+      </Container>
+    </>
+  );
+}
 
-        <Grid item xs={12} md={7}>
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, mb: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-              Results
-            </Typography>
-            <VelocityResults outputs={outputs} />
-          </Paper>
-
-          <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-              Pipe Diagram
-            </Typography>
-            <PipeDrawing2D
-              diameterMm={diameterMm}
-              velocityMs={outputs.velocityMs}
-              diameterUnit={inputs.pipeDiameterUnit}
-              diameterValue={inputs.pipeDiameter}
-            />
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+function SectionLabel({ children, color }: { children: React.ReactNode; color: string }) {
+  return (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+      <Stack
+        sx={{
+          width: 4,
+          height: 18,
+          borderRadius: 0,
+          bgcolor: color,
+        }}
+      />
+      <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: '0.85rem', color }}>
+        {children}
+      </Typography>
+    </Stack>
   );
 }
