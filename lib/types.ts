@@ -13,12 +13,14 @@ export interface TankInputs {
   innerDiameter: number; // mm (metric) or in (imperial)
   workingVolume: number; // L (metric) or gal (imperial)
   coneAngle: number; // degrees
+  fillPercentage: number; // 0–100
 }
 
 export interface TankOutputs {
   cylinderHeight: number; // mm (metric) or in (imperial)
   coneHeight: number; // mm (metric) or in (imperial)
   totalHeight: number; // mm (metric) or in (imperial)
+  liquidHeight: number; // mm (metric) or in (imperial)
   hdRatio: number; // dimensionless
   totalVolume: number; // L (metric) or gal (imperial)
   totalVolumeM3: number; // always m³ for display
@@ -75,14 +77,12 @@ export interface FrictionOutputs {
 // Fluid Velocity Calculator Types
 // ============================================
 
-export type VelocityFlowUnit = 'm3h' | 'Lmin' | 'Ls' | 'GPM';
-export type VelocityDiameterUnit = 'mm' | 'in';
+export type VelocityFlowUnit = 'm3h' | 'Lmin' | 'GPM';
 
 export interface VelocityInputs {
   flowRate: number;
   flowRateUnit: VelocityFlowUnit;
-  pipeDiameter: number;
-  pipeDiameterUnit: VelocityDiameterUnit;
+  nominalDiameter: number; // nominal inches
 }
 
 export interface VelocityOutputs {
@@ -100,13 +100,16 @@ export interface VelocityOutputs {
 export type PressureUnit = 'psi' | 'bar';
 export type HeadUnit = 'ft' | 'm';
 
+export type NpshPressureInputUnit = 'psi' | 'ft' | 'bar' | 'm';
+
 export interface NpshInputs {
   unitSystem: UnitSystem;
-  atmosphericPressure: number; // psi (imperial) or bar (metric)
-  sourcePressure: number; // psi (imperial) or bar (metric)
+  pressureInputUnit: NpshPressureInputUnit; // psi or ft (imperial), bar or m (metric)
+  atmosphericPressure: number;
+  sourcePressure: number;
   staticHeight: number; // ft (imperial) or m (metric) — positive = pump above liquid
   frictionLoss: number; // ft (imperial) or m (metric)
-  vaporPressure: number; // psi (imperial) or bar (metric)
+  vaporPressure: number;
   specificGravity: number;
 }
 
@@ -137,6 +140,7 @@ export interface PipeSize {
   nominal_in: number;
   label: string;
   id_m: number;
+  id_in: number;
 }
 
 export interface FittingsKValues {

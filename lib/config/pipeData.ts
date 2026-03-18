@@ -1,14 +1,15 @@
 import { PipeSize } from '@/lib/types';
 
 export const PIPE_SIZES: PipeSize[] = [
-  { nominal_in: 0.75, label: '0.75 in (\u224819 mm)', id_m: 0.01905 },
-  { nominal_in: 1.0,  label: '1.0 in (\u224825 mm)',  id_m: 0.02540 },
-  { nominal_in: 1.5,  label: '1.5 in (\u224838 mm)',  id_m: 0.03810 },
-  { nominal_in: 2.0,  label: '2.0 in (\u224851 mm)',  id_m: 0.05080 },
-  { nominal_in: 2.5,  label: '2.5 in (\u224863 mm)',  id_m: 0.06350 },
-  { nominal_in: 3.0,  label: '3.0 in (\u224876 mm)',  id_m: 0.07620 },
-  { nominal_in: 4.0,  label: '4.0 in (\u2248102 mm)', id_m: 0.10160 },
-  { nominal_in: 6.0,  label: '6.0 in (\u2248152 mm)', id_m: 0.15240 },
+  { nominal_in: 0.5,  label: '½″',   id_m: 0.01250, id_in: 0.500 },
+  { nominal_in: 0.75, label: '¾″',   id_m: 0.01905, id_in: 0.750 },
+  { nominal_in: 1.0,  label: '1″',   id_m: 0.02540, id_in: 1.000 },
+  { nominal_in: 1.5,  label: '1½″',  id_m: 0.03810, id_in: 1.500 },
+  { nominal_in: 2.0,  label: '2″',   id_m: 0.04763, id_in: 1.875 },
+  { nominal_in: 2.5,  label: '2½″',  id_m: 0.06198, id_in: 2.440 },
+  { nominal_in: 3.0,  label: '3″',   id_m: 0.07391, id_in: 2.910 },
+  { nominal_in: 4.0,  label: '4″',   id_m: 0.09804, id_in: 3.860 },
+  { nominal_in: 6.0,  label: '6″',   id_m: 0.15240, id_in: 5.782 },
 ];
 
 /** Pipe roughness for sanitary stainless steel (metres) */

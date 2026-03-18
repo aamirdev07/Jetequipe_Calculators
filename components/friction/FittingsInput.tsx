@@ -23,7 +23,7 @@ export default function FittingsInput({
     <Grid container spacing={1.5}>
       <Grid item xs={6}>
         <InputField
-          label="45\u00B0 Elbows"
+          label="45° Elbows"
           value={elbows45}
           onChange={(v) => onChange('elbows45', v)}
           type="integer"
@@ -32,7 +32,7 @@ export default function FittingsInput({
       </Grid>
       <Grid item xs={6}>
         <InputField
-          label="90\u00B0 Elbows"
+          label="90° Elbows"
           value={elbows90}
           onChange={(v) => onChange('elbows90', v)}
           type="integer"
@@ -59,7 +59,7 @@ export default function FittingsInput({
       </Grid>
       <Grid item xs={12}>
         <Typography variant="caption" color="text.secondary">
-          K-values: 45\u00B0=0.35, 90\u00B0=0.75, Ball=0.05, Butterfly=0.25
+          K-values: 45°=0.35, 90°=0.75, Ball=0.05, Butterfly=0.25
         </Typography>
       </Grid>
     </Grid>

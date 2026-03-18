@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Stack, Typography, Container, Grid, Button } from '@mui/material';
+import { Stack, Typography, Container, Grid } from '@mui/material';
 import Link from 'next/link';
 
 const calculatorLinks = [
@@ -12,9 +12,9 @@ const calculatorLinks = [
 ];
 
 const companyLinks = [
-  { label: 'Jetequip Home', href: 'https://jetequip.com/en/', external: true },
-  { label: 'Products', href: 'https://jetequip.com/en/products/', external: true },
-  { label: 'Contact', href: 'https://jetequip.com/en/contact/', external: true },
+  { label: 'Jetequip Home', href: 'https://jetequip.com/en/' },
+  { label: 'Products', href: 'https://jetequip.com/en/produits/' },
+  { label: 'Contact', href: 'https://jetequip.com/en/joindre/' },
 ];
 
 export default function Footer() {
@@ -28,7 +28,7 @@ export default function Footer() {
       }}
     >
       {/* Main footer */}
-      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 5 } }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 6 } }}>
         <Grid container spacing={{ xs: 4, md: 6 }}>
           {/* Brand column */}
           <Grid item xs={12} sm={5}>
@@ -39,19 +39,19 @@ export default function Footer() {
               style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
             >
               <img
-                src="https://jetequip.com/wp-content/themes/custom/assets/New_images/Shared/Logo_Jetequip_c.png"
+                src="/Jetequip-Couleur-Sans-Mention.png"
                 alt="Jetequip"
-                style={{ height: 32, objectFit: 'contain' }}
+                style={{ height: 44, objectFit: 'contain' }}
               />
             </a>
             <Typography
               variant="body2"
               sx={{
                 color: 'rgba(255,255,255,0.55)',
-                mt: 2,
-                maxWidth: 300,
-                lineHeight: 1.6,
-                fontSize: '0.8rem',
+                mt: 2.5,
+                maxWidth: 320,
+                lineHeight: 1.7,
+                fontSize: '0.85rem',
               }}
             >
               Sanitary and aseptic process solutions for food, beverage, dairy, pharmaceutical, and biotech industries.
@@ -67,21 +67,21 @@ export default function Footer() {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: 1,
-                fontSize: '0.65rem',
+                fontSize: '0.7rem',
                 display: 'block',
-                mb: 1.5,
+                mb: 2,
               }}
             >
               Calculators
             </Typography>
-            <Stack spacing={0.75}>
+            <Stack spacing={1}>
               {calculatorLinks.map((link) => (
                 <Link key={link.href} href={link.href} style={{ textDecoration: 'none' }}>
                   <Typography
                     variant="body2"
                     sx={{
                       color: 'rgba(255,255,255,0.6)',
-                      fontSize: '0.8rem',
+                      fontSize: '0.85rem',
                       transition: 'color 0.15s',
                       '&:hover': { color: '#fff' },
                       cursor: 'pointer',
@@ -103,14 +103,14 @@ export default function Footer() {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: 1,
-                fontSize: '0.65rem',
+                fontSize: '0.7rem',
                 display: 'block',
-                mb: 1.5,
+                mb: 2,
               }}
             >
               Company
             </Typography>
-            <Stack spacing={0.75}>
+            <Stack spacing={1}>
               {companyLinks.map((link) => (
                 <a
                   key={link.href}
@@ -123,7 +123,7 @@ export default function Footer() {
                     variant="body2"
                     sx={{
                       color: 'rgba(255,255,255,0.6)',
-                      fontSize: '0.8rem',
+                      fontSize: '0.85rem',
                       transition: 'color 0.15s',
                       '&:hover': { color: '#fff' },
                       cursor: 'pointer',
@@ -142,7 +142,7 @@ export default function Footer() {
       <Stack
         sx={{
           borderTop: '1px solid rgba(255,255,255,0.08)',
-          py: 2,
+          py: 2.5,
         }}
       >
         <Container maxWidth="lg">
@@ -154,13 +154,13 @@ export default function Footer() {
           >
             <Typography
               variant="caption"
-              sx={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem' }}
+              sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}
             >
               &copy; {new Date().getFullYear()} Jetequip. All rights reserved.
             </Typography>
             <Typography
               variant="caption"
-              sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.68rem' }}
+              sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}
             >
               For estimation only — verify with a qualified engineer.
             </Typography>

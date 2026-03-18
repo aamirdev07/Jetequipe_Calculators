@@ -2,46 +2,53 @@
 
 import React from 'react';
 import { Stack } from '@mui/material';
+import { NpshOutputs } from '@/lib/types';
 
 interface NpshDiagramProps {
   staticHeight: number;
   unitLabel: string;
+  outputs: NpshOutputs;
 }
 
-export default function NpshDiagram({ staticHeight, unitLabel }: NpshDiagramProps) {
-  const svgWidth = 420;
-  const svgHeight = 300;
+export default function NpshDiagram({ staticHeight, unitLabel, outputs }: NpshDiagramProps) {
+  const svgWidth = 460;
+  const svgHeight = 340;
 
   const pumpAbove = staticHeight > 0;
 
-  const tankX = 40;
-  const tankY = pumpAbove ? 100 : 160;
-  const tankW = 80;
-  const tankH = 100;
+  // Tank position
+  const tankX = 30;
+  const tankY = pumpAbove ? 80 : 140;
+  const tankW = 90;
+  const tankH = 110;
 
-  const pumpX = 280;
-  const pumpY = pumpAbove ? 80 : 200;
-  const pumpR = 25;
+  // Pump position
+  const pumpX = 300;
+  const pumpY = pumpAbove ? 60 : 210;
+  const pumpR = 26;
 
-  const liquidLevel = tankY + 20;
+  // Liquid level inside tank
+  const liquidLevel = tankY + 25;
   const pipeExitY = tankY + tankH - 15;
-  const pipeToX = pumpX - pumpR;
+  const pipeToX = pumpX - pumpR - 10;
+
+  // Ground/datum line
+  const datumY = Math.max(tankY + tankH + 30, pumpY + pumpR + 30);
 
   return (
     <Stack alignItems="center" sx={{ mt: 2 }}>
-      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height="auto" style={{ maxHeight: 300 }}>
+      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} width="100%" height="auto" style={{ maxHeight: 340 }}>
         <rect x="0" y="0" width={svgWidth} height={svgHeight} fill="#F8FAFC" rx="8" />
 
-        {/* Tank */}
+        {/* Tank body */}
         <rect
           x={tankX}
           y={tankY}
           width={tankW}
           height={tankH}
-          fill="#E3F2FD"
+          fill="none"
           stroke="#0072CE"
           strokeWidth={2}
-          rx={2}
         />
         {/* Liquid in tank */}
         <rect
@@ -50,25 +57,43 @@ export default function NpshDiagram({ staticHeight, unitLabel }: NpshDiagramProp
           width={tankW - 4}
           height={tankY + tankH - liquidLevel - 2}
           fill="#BBDEFB"
-          rx={1}
+          opacity={0.5}
         />
-        {/* Tank open top indicator */}
-        <line x1={tankX - 5} y1={tankY} x2={tankX + 5} y2={tankY - 8} stroke="#5A6A7A" strokeWidth={1} />
-        <line x1={tankX + tankW - 5} y1={tankY} x2={tankX + tankW + 5} y2={tankY - 8} stroke="#5A6A7A" strokeWidth={1} />
+        {/* Liquid surface line */}
+        <line
+          x1={tankX + 4} y1={liquidLevel}
+          x2={tankX + tankW - 4} y2={liquidLevel}
+          stroke="#1976D2" strokeWidth={1} strokeDasharray="4,3"
+        />
 
-        {/* P_atm label */}
+        {/* Tank open top indicator (atmospheric) */}
+        <line x1={tankX - 4} y1={tankY} x2={tankX + 4} y2={tankY - 7} stroke="#5A6A7A" strokeWidth={1} />
+        <line x1={tankX + tankW - 4} y1={tankY} x2={tankX + tankW + 4} y2={tankY - 7} stroke="#5A6A7A" strokeWidth={1} />
+
+        {/* P_atm + P_source label */}
         <text
           x={tankX + tankW / 2}
-          y={tankY - 12}
+          y={tankY - 14}
           textAnchor="middle"
-          fill="#5A6A7A"
+          fill="#0072CE"
           fontSize="10"
+          fontWeight="600"
           fontFamily="Inter, sans-serif"
         >
-          {'P_atm ↓'}
+          P_atm + P_s
+        </text>
+        <text
+          x={tankX + tankW / 2}
+          y={tankY - 3}
+          textAnchor="middle"
+          fill="#5A6A7A"
+          fontSize="8"
+          fontFamily="Inter, sans-serif"
+        >
+          ↓ ha + hs
         </text>
 
-        {/* Suction pipe */}
+        {/* Suction pipe: horizontal from tank to vertical rise */}
         <line
           x1={tankX + tankW}
           y1={pipeExitY}
@@ -77,99 +102,157 @@ export default function NpshDiagram({ staticHeight, unitLabel }: NpshDiagramProp
           stroke="#0072CE"
           strokeWidth={3}
         />
+
+        {/* Suction pipe: vertical to pump height */}
         {pumpAbove ? (
           <>
-            <line x1={pipeToX} y1={pipeExitY} x2={pipeToX} y2={pumpY + pumpR} stroke="#0072CE" strokeWidth={3} />
-            <line x1={pipeToX} y1={pumpY + pumpR} x2={pumpX - pumpR} y2={pumpY + pumpR} stroke="#0072CE" strokeWidth={3} />
+            <line x1={pipeToX} y1={pipeExitY} x2={pipeToX} y2={pumpY} stroke="#0072CE" strokeWidth={3} />
+            <line x1={pipeToX} y1={pumpY} x2={pumpX - pumpR} y2={pumpY} stroke="#0072CE" strokeWidth={3} />
           </>
         ) : (
           <>
-            <line x1={pipeToX} y1={pipeExitY} x2={pipeToX} y2={pumpY - pumpR} stroke="#0072CE" strokeWidth={3} />
-            <line x1={pipeToX} y1={pumpY - pumpR} x2={pumpX - pumpR} y2={pumpY - pumpR} stroke="#0072CE" strokeWidth={3} />
+            <line x1={pipeToX} y1={pipeExitY} x2={pipeToX} y2={pumpY} stroke="#0072CE" strokeWidth={3} />
+            <line x1={pipeToX} y1={pumpY} x2={pumpX - pumpR} y2={pumpY} stroke="#0072CE" strokeWidth={3} />
           </>
         )}
 
-        {/* hf label on pipe */}
+        {/* hf label on horizontal pipe */}
         <text
           x={(tankX + tankW + pipeToX) / 2}
-          y={pipeExitY - 8}
+          y={pipeExitY - 10}
           textAnchor="middle"
           fill="#ED6C02"
-          fontSize="9"
-          fontFamily="Inter, sans-serif"
+          fontSize="10"
           fontWeight="600"
+          fontFamily="Inter, sans-serif"
         >
-          hf (friction)
+          hf = {outputs.frictionHead.toFixed(2)} {unitLabel}
+        </text>
+        <text
+          x={(tankX + tankW + pipeToX) / 2}
+          y={pipeExitY + 14}
+          textAnchor="middle"
+          fill="#5A6A7A"
+          fontSize="8"
+          fontFamily="Inter, sans-serif"
+        >
+          friction loss
         </text>
 
-        {/* Pump symbol */}
+        {/* Pump symbol (circle with impeller) */}
         <circle cx={pumpX} cy={pumpY} r={pumpR} fill="#E8F5E9" stroke="#2E7D32" strokeWidth={2} />
         <text
           x={pumpX}
           y={pumpY + 4}
           textAnchor="middle"
           fill="#2E7D32"
-          fontSize="11"
+          fontSize="10"
           fontWeight="700"
           fontFamily="Inter, sans-serif"
         >
           PUMP
         </text>
 
-        {/* Discharge pipe */}
-        <line x1={pumpX + pumpR} y1={pumpY} x2={svgWidth - 30} y2={pumpY} stroke="#00A859" strokeWidth={3} />
+        {/* Discharge pipe with arrow */}
+        <line x1={pumpX + pumpR} y1={pumpY} x2={svgWidth - 25} y2={pumpY} stroke="#00A859" strokeWidth={3} />
         <polygon
-          points={`${svgWidth - 30},${pumpY - 6} ${svgWidth - 18},${pumpY} ${svgWidth - 30},${pumpY + 6}`}
+          points={`${svgWidth - 25},${pumpY - 6} ${svgWidth - 13},${pumpY} ${svgWidth - 25},${pumpY + 6}`}
           fill="#00A859"
         />
+        <text
+          x={svgWidth - 18}
+          y={pumpY - 10}
+          textAnchor="middle"
+          fill="#00A859"
+          fontSize="8"
+          fontFamily="Inter, sans-serif"
+        >
+          discharge
+        </text>
 
-        {/* Delta-z dimension */}
+        {/* Delta-z dimension line */}
         {staticHeight !== 0 && (
           <>
             <line
-              x1={pumpX + 45}
+              x1={pumpX + pumpR + 12}
               y1={liquidLevel}
-              x2={pumpX + 45}
+              x2={pumpX + pumpR + 12}
               y2={pumpY}
               stroke="#D32F2F"
-              strokeWidth={1}
+              strokeWidth={1.5}
               strokeDasharray="4,3"
             />
-            <line x1={pumpX + 40} y1={liquidLevel} x2={pumpX + 50} y2={liquidLevel} stroke="#D32F2F" strokeWidth={1} />
-            <line x1={pumpX + 40} y1={pumpY} x2={pumpX + 50} y2={pumpY} stroke="#D32F2F" strokeWidth={1} />
+            <line x1={pumpX + pumpR + 7} y1={liquidLevel} x2={pumpX + pumpR + 17} y2={liquidLevel} stroke="#D32F2F" strokeWidth={1} />
+            <line x1={pumpX + pumpR + 7} y1={pumpY} x2={pumpX + pumpR + 17} y2={pumpY} stroke="#D32F2F" strokeWidth={1} />
             <text
-              x={pumpX + 55}
-              y={(liquidLevel + pumpY) / 2 + 4}
+              x={pumpX + pumpR + 20}
+              y={(liquidLevel + pumpY) / 2 - 2}
               fill="#D32F2F"
               fontSize="10"
               fontWeight="600"
               fontFamily="Inter, sans-serif"
             >
-              {`Δz = ${Math.abs(staticHeight)} ${unitLabel}`}
+              Δz = {Math.abs(staticHeight)} {unitLabel}
+            </text>
+            <text
+              x={pumpX + pumpR + 20}
+              y={(liquidLevel + pumpY) / 2 + 10}
+              fill="#5A6A7A"
+              fontSize="8"
+              fontFamily="Inter, sans-serif"
+            >
+              {pumpAbove ? 'suction lift' : 'flooded suction'}
             </text>
           </>
         )}
 
+        {/* hvp label near pump */}
+        <text
+          x={pumpX}
+          y={pumpY + pumpR + 16}
+          textAnchor="middle"
+          fill="#7C3AED"
+          fontSize="9"
+          fontWeight="600"
+          fontFamily="Inter, sans-serif"
+        >
+          hvp = {outputs.vaporHead.toFixed(2)} {unitLabel}
+        </text>
+
         {/* Labels */}
         <text
           x={tankX + tankW / 2}
-          y={tankY + tankH + 18}
+          y={tankY + tankH + 16}
           textAnchor="middle"
           fill="#5A6A7A"
           fontSize="10"
+          fontWeight="500"
           fontFamily="Inter, sans-serif"
         >
           Supply Tank
         </text>
+
+        {/* NPSHa result */}
+        <rect
+          x={tankX}
+          y={datumY + 4}
+          width={svgWidth - tankX * 2}
+          height={24}
+          fill="#FFF3E0"
+          stroke="#E65100"
+          strokeWidth={1}
+          rx={2}
+        />
         <text
-          x={pumpX}
-          y={pumpY + pumpR + 18}
+          x={svgWidth / 2}
+          y={datumY + 20}
           textAnchor="middle"
-          fill="#5A6A7A"
-          fontSize="10"
+          fill="#E65100"
+          fontSize="11"
+          fontWeight="700"
           fontFamily="Inter, sans-serif"
         >
-          {pumpAbove ? 'Suction lift' : 'Flooded suction'}
+          NPSHa = ha + hs − Δz − hf − hvp = {outputs.npsha.toFixed(2)} {unitLabel}
         </text>
       </svg>
     </Stack>

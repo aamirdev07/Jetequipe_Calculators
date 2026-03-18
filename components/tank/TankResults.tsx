@@ -27,7 +27,12 @@ export default function TankResults({ outputs, unitSystem }: TankResultsProps) {
   const lenUnit = isMetric ? 'mm' : 'in';
   const volUnit = isMetric ? 'L' : 'gal';
   const ratioInfo = getRatioStatus(outputs.hdRatio);
-  const ratioChipColor = ratioInfo.color === 'default' ? 'primary' : ratioInfo.color;
+
+  const ratioChipColor: Record<string, string> = {
+    success: '#2E7D32',
+    warning: '#ED6C02',
+    error: '#D32F2F',
+  };
 
   return (
     <Grid container spacing={1.5}>
@@ -35,39 +40,44 @@ export default function TankResults({ outputs, unitSystem }: TankResultsProps) {
         <ResultCard label="Cylinder Height" value={outputs.cylinderHeight.toLocaleString()} unit={lenUnit} compact accentColor={BLUE} />
       </Grid>
       <Grid item xs={6}>
-        <ResultCard label="Cone Height" value={outputs.coneHeight.toLocaleString()} unit={lenUnit} compact accentColor={BLUE} />
+        <ResultCard label="Total Height" value={outputs.totalHeight.toLocaleString()} unit={lenUnit} compact accentColor={GREEN} />
       </Grid>
       <Grid item xs={6}>
-        <ResultCard label="Total Height" value={outputs.totalHeight.toLocaleString()} unit={lenUnit} compact accentColor={GREEN} />
+        <ResultCard label="Liquid Height" value={outputs.liquidHeight.toLocaleString()} unit={lenUnit} compact accentColor={BLUE} />
       </Grid>
       <Grid item xs={6}>
         <ResultCard label="Total Volume" value={outputs.totalVolume.toLocaleString()} unit={volUnit} compact accentColor={GREEN} />
       </Grid>
       <Grid item xs={6}>
-        <ResultCard label="Total Volume" value={outputs.totalVolumeM3} unit={'\u00B3'} compact />
+        <ResultCard label="Total Volume" value={outputs.totalVolumeM3.toFixed(4)} unit="m³" compact />
       </Grid>
       <Grid item xs={6}>
         <Paper
           variant="outlined"
           sx={{
             p: 1.5,
-            borderColor: alpha(BLUE, 0.2),
-            bgcolor: alpha(BLUE, 0.02),
+            borderColor: alpha(ratioChipColor[ratioInfo.color] || BLUE, 0.2),
+            bgcolor: alpha(ratioChipColor[ratioInfo.color] || BLUE, 0.02),
             height: '100%',
           }}
         >
           <Typography variant="caption" color="text.secondary" fontWeight={500} textTransform="uppercase" letterSpacing={0.5} sx={{ fontSize: '0.65rem' }}>
             H/ID Ratio
           </Typography>
-          <Typography variant="body1" fontWeight={700} color={BLUE} sx={{ mt: 0.25, fontSize: '1rem' }}>
+          <Typography variant="body1" fontWeight={700} sx={{ mt: 0.25, fontSize: '1rem', color: ratioChipColor[ratioInfo.color] || BLUE }}>
             {outputs.hdRatio}
           </Typography>
           <Chip
             label={ratioInfo.label}
-            color={ratioChipColor as 'primary' | 'warning' | 'error'}
-            variant="outlined"
             size="small"
-            sx={{ mt: 0.5, height: 22, fontSize: '0.7rem' }}
+            sx={{
+              mt: 0.5,
+              height: 22,
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              color: '#fff',
+              bgcolor: ratioChipColor[ratioInfo.color],
+            }}
           />
         </Paper>
       </Grid>

@@ -25,7 +25,7 @@ export default function FrictionLossPage() {
   const [inputs, setInputs] = useState<FrictionInputs>(FRICTION_DEFAULTS);
   const outputs = useMemo(() => calculateFrictionLoss(inputs), [inputs]);
 
-  const flowUnitMap: Record<string, string> = { GPM: 'GPM', LPM: 'L/min', m3h: 'm\u00B3/h' };
+  const flowUnitMap: Record<string, string> = { GPM: 'GPM', LPM: 'L/min', m3h: 'm³/h' };
   const pipeLabel = PIPE_SIZES.find((p) => p.nominal_in === inputs.nominalDiameter)?.label ?? String(inputs.nominalDiameter);
 
   const exportRows: ExportRow[] = useMemo(() => {
@@ -33,15 +33,15 @@ export default function FrictionLossPage() {
     return [
       { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit]}` },
       { label: 'Viscosity', value: `${inputs.viscosity} cP` },
-      { label: 'Temperature', value: `${inputs.temperature} \u00B0C` },
+      { label: 'Temperature', value: `${inputs.temperature} °C` },
       { label: 'Specific Gravity', value: String(inputs.specificGravity) },
       { label: 'Pipe Diameter', value: pipeLabel },
       { label: 'Pipe Length', value: `${inputs.pipeLength} ${inputs.pipeLengthUnit}` },
-      { label: '45\u00B0 Elbows', value: String(inputs.elbows45) },
-      { label: '90\u00B0 Elbows', value: String(inputs.elbows90) },
+      { label: '45° Elbows', value: String(inputs.elbows45) },
+      { label: '90° Elbows', value: String(inputs.elbows90) },
       { label: 'Ball Valves', value: String(inputs.ballValves) },
       { label: 'Butterfly Valves', value: String(inputs.butterflyValves) },
-      { label: 'Elevation Change', value: `${inputs.elevationChange} ${inputs.elevationUnit}` },
+      { label: 'Rise', value: `${inputs.elevationChange} ${inputs.elevationUnit}` },
       ...(inputs.additionalLoss > 0 ? [{ label: 'Additional Loss', value: `${inputs.additionalLoss} ${inputs.additionalLossUnit}` }] : []),
       { label: 'Total Head Loss', value: `${outputs.totalHeadLossFt.toFixed(2)} ft (${outputs.totalHeadLossM.toFixed(2)} m)` },
       { label: 'Total Pressure Loss', value: `${outputs.totalPressureLossPsi.toFixed(2)} psi (${outputs.totalPressureLossBar.toFixed(3)} bar)` },
@@ -63,7 +63,7 @@ export default function FrictionLossPage() {
 
       <Container maxWidth="lg" sx={{ py: { xs: 2.5, md: 3.5 } }}>
         <Grid container spacing={{ xs: 2, md: 3 }}>
-          <Grid item xs={12} md={5}>
+          <Grid item xs={12} md={6}>
             <FadeInView delay={0.05}>
               <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
                 <SectionLabel color={ACCENT}>Inputs</SectionLabel>
@@ -72,21 +72,29 @@ export default function FrictionLossPage() {
             </FadeInView>
           </Grid>
 
-          <Grid item xs={12} md={7}>
+          <Grid item xs={12} md={6}>
             <FadeInView delay={0.1}>
-              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5 }}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: { xs: 2, sm: 2.5 },
+                  mb: 2.5,
+                  position: 'sticky',
+                  top: 64,
+                }}
+              >
                 <SectionLabel color="#00A859">Results</SectionLabel>
                 <FrictionResults outputs={outputs} />
+                {!outputs.error && (
+                  <ExportBar title="Friction Loss Calculator" rows={exportRows} accentColor={ACCENT} />
+                )}
               </Paper>
             </FadeInView>
 
             {!outputs.error && (
-              <>
-                <ExportBar title="Friction Loss Calculator" rows={exportRows} accentColor={ACCENT} />
-                <FadeInView delay={0.15}>
-                  <FrictionRecap inputs={inputs} outputs={outputs} />
-                </FadeInView>
-              </>
+              <FadeInView delay={0.15}>
+                <FrictionRecap inputs={inputs} outputs={outputs} />
+              </FadeInView>
             )}
           </Grid>
         </Grid>

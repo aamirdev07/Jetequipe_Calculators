@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, InputAdornment } from '@mui/material';
 
 interface InputFieldProps {
@@ -30,23 +30,43 @@ export default function InputField({
   fullWidth = true,
   disabled = false,
 }: InputFieldProps) {
+  const [displayValue, setDisplayValue] = useState<string>(String(value));
+
+  useEffect(() => {
+    setDisplayValue(String(value));
+  }, [value]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
+    setDisplayValue(raw);
+
     if (raw === '' || raw === '-') {
-      onChange(0);
-      return;
+      return; // keep display empty, don't update numeric value yet
     }
     const num = type === 'integer' ? parseInt(raw, 10) : parseFloat(raw);
     if (!isNaN(num)) {
+      // Block negative values when min >= 0
+      if (min !== undefined && min >= 0 && num < 0) {
+        return;
+      }
       onChange(num);
+    }
+  };
+
+  const handleBlur = () => {
+    if (displayValue === '' || displayValue === '-') {
+      const fallback = min !== undefined && min > 0 ? min : 0;
+      setDisplayValue(String(fallback));
+      onChange(fallback);
     }
   };
 
   return (
     <TextField
       label={label}
-      value={value}
+      value={displayValue}
       onChange={handleChange}
+      onBlur={handleBlur}
       type="number"
       fullWidth={fullWidth}
       disabled={disabled}

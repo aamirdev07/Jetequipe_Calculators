@@ -17,6 +17,7 @@ const DEFAULTS_METRIC: TankInputs = {
   innerDiameter: 1000,
   workingVolume: 1000,
   coneAngle: 60,
+  fillPercentage: 80,
 };
 
 const DEFAULTS_IMPERIAL: TankInputs = {
@@ -24,6 +25,7 @@ const DEFAULTS_IMPERIAL: TankInputs = {
   innerDiameter: 39.4,
   workingVolume: 264.2,
   coneAngle: 60,
+  fillPercentage: 80,
 };
 
 export { DEFAULTS_METRIC as TANK_DEFAULTS_METRIC, DEFAULTS_IMPERIAL as TANK_DEFAULTS_IMPERIAL };
@@ -84,7 +86,7 @@ export default function TankForm({ inputs, onChange }: TankFormProps) {
         label="Working Volume"
         value={inputs.workingVolume}
         onChange={(v) => onChange({ ...inputs, workingVolume: v })}
-        min={isMetric ? 10 : 3}
+        min={isMetric ? 1 : 1}
         max={isMetric ? 70000 : 18500}
         step={isMetric ? 10 : 1}
         unit={isMetric ? 'L' : 'gal'}
@@ -92,14 +94,25 @@ export default function TankForm({ inputs, onChange }: TankFormProps) {
       />
 
       <SliderInput
-        label="Cone Angle (\u03C6)"
+        label="Cone Angle (φ)"
         value={inputs.coneAngle}
         onChange={(v) => onChange({ ...inputs, coneAngle: v })}
         min={10}
-        max={170}
+        max={180}
         step={1}
-        unit="\u00B0"
-        tooltipText="Full cone angle at the bottom of the tank (typically 60\u00B0 for sanitary tanks)"
+        unit="°"
+        tooltipText="Full cone angle at the bottom of the tank (typically 60° for sanitary tanks)"
+      />
+
+      <SliderInput
+        label="Fill Percentage"
+        value={inputs.fillPercentage}
+        onChange={(v) => onChange({ ...inputs, fillPercentage: v })}
+        min={0}
+        max={100}
+        step={1}
+        unit="%"
+        tooltipText="Liquid fill level as a percentage of total tank volume"
       />
     </Box>
   );

@@ -21,35 +21,28 @@ export default function NpshResults({ outputs, unitSystem }: NpshResultsProps) {
   }
 
   const unit = unitSystem === 'imperial' ? 'ft' : 'm';
-  const chipColor =
-    outputs.riskLevel === 'adequate' ? 'success' :
-    outputs.riskLevel === 'low' ? 'warning' : 'error';
-
-  const resultColor =
-    outputs.riskLevel === 'adequate' ? '#2E7D32' :
-    outputs.riskLevel === 'low' ? '#ED6C02' : '#D32F2F';
 
   return (
     <Stack spacing={2}>
       <Paper
         sx={{
           p: 2.5,
-          bgcolor: alpha(resultColor, 0.04),
-          border: `1px solid ${alpha(resultColor, 0.15)}`,
+          bgcolor: alpha(ACCENT, 0.04),
+          border: `1px solid ${alpha(ACCENT, 0.15)}`,
           borderRadius: 0,
         }}
       >
         <Typography variant="caption" color="text.secondary" fontWeight={500} textTransform="uppercase" letterSpacing={0.5} sx={{ display: 'block', fontSize: '0.65rem' }}>
           NPSHa (Net Positive Suction Head Available)
         </Typography>
-        <Typography variant="h4" fontWeight={700} sx={{ my: 0.75, fontSize: '1.75rem', color: resultColor }}>
+        <Typography variant="h4" fontWeight={700} sx={{ my: 0.75, fontSize: '1.75rem', color: ACCENT }}>
           {outputs.npsha.toFixed(2)} {unit}
         </Typography>
         <Chip
           label={outputs.riskLabel}
-          color={chipColor}
+          variant="outlined"
           size="small"
-          sx={{ fontWeight: 600, height: 24 }}
+          sx={{ fontWeight: 600, height: 24, borderColor: 'divider', color: 'text.primary' }}
         />
       </Paper>
 
@@ -98,7 +91,7 @@ export default function NpshResults({ outputs, unitSystem }: NpshResultsProps) {
             <Typography variant="body2" fontWeight={700} sx={{ fontSize: '0.85rem' }}>
               = NPSHa
             </Typography>
-            <Typography variant="body2" fontWeight={700} sx={{ fontSize: '0.85rem', color: resultColor }}>
+            <Typography variant="body2" fontWeight={700} sx={{ fontSize: '0.85rem', color: ACCENT }}>
               {outputs.npsha.toFixed(2)} {unit}
             </Typography>
           </Stack>

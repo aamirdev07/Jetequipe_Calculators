@@ -20,13 +20,13 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   '@media print': { display: 'none' },
 }));
 
-const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+const StyledToolbar = styled(Toolbar)({
   justifyContent: 'space-between',
-  minHeight: '56px !important',
-  maxHeight: 56,
+  minHeight: '60px !important',
+  maxHeight: 60,
   paddingLeft: 0,
   paddingRight: 0,
-}));
+});
 
 export default function Header() {
   const pathname = usePathname();
@@ -48,15 +48,15 @@ export default function Header() {
               }}
             >
               <img
-                src="https://jetequip.com/wp-content/themes/custom/assets/New_images/Shared/Logo_Jetequip_c.png"
+                src="/Jetequip-Couleur-Sans-Mention.png"
                 alt="Jetequip"
-                style={{ height: 28, objectFit: 'contain' }}
+                style={{ height: 38, objectFit: 'contain' }}
               />
             </a>
             <Stack
               sx={{
                 width: '1px',
-                height: 20,
+                height: 24,
                 bgcolor: 'divider',
                 display: { xs: 'none', sm: 'block' },
               }}
@@ -67,7 +67,7 @@ export default function Header() {
                 sx={{
                   color: 'text.primary',
                   fontWeight: 600,
-                  fontSize: '0.875rem',
+                  fontSize: '0.9rem',
                   display: { xs: 'none', sm: 'block' },
                 }}
               >

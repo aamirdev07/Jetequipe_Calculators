@@ -33,7 +33,7 @@ export default function FrictionRecap({ inputs, outputs }: FrictionRecapProps) {
   const flowUnitLabel: Record<string, string> = {
     GPM: 'GPM',
     LPM: 'L/min',
-    m3h: 'm\u00B3/h',
+    m3h: 'm³/h',
   };
 
   return (
@@ -48,15 +48,15 @@ export default function FrictionRecap({ inputs, outputs }: FrictionRecapProps) {
           <TableBody>
             <RecapRow label="Flow Rate" value={`${inputs.flowRate} ${flowUnitLabel[inputs.flowRateUnit]}`} />
             <RecapRow label="Viscosity" value={`${inputs.viscosity} cP`} />
-            <RecapRow label="Temperature" value={`${inputs.temperature} \u00B0C`} />
+            <RecapRow label="Temperature" value={`${inputs.temperature} °C`} />
             <RecapRow label="Specific Gravity" value={String(inputs.specificGravity)} />
             <RecapRow label="Pipe Diameter" value={pipeLabel} />
             <RecapRow label="Pipe Length" value={`${inputs.pipeLength} ${inputs.pipeLengthUnit}`} />
-            <RecapRow label="45\u00B0 Elbows" value={String(inputs.elbows45)} />
-            <RecapRow label="90\u00B0 Elbows" value={String(inputs.elbows90)} />
+            <RecapRow label="45° Elbows" value={String(inputs.elbows45)} />
+            <RecapRow label="90° Elbows" value={String(inputs.elbows90)} />
             <RecapRow label="Ball Valves" value={String(inputs.ballValves)} />
             <RecapRow label="Butterfly Valves" value={String(inputs.butterflyValves)} />
-            <RecapRow label="Elevation Change" value={`${inputs.elevationChange} ${inputs.elevationUnit}`} />
+            <RecapRow label="Rise" value={`${inputs.elevationChange} ${inputs.elevationUnit}`} />
             {inputs.additionalLoss > 0 && (
               <RecapRow label="Additional Loss" value={`${inputs.additionalLoss} ${inputs.additionalLossUnit}`} />
             )}

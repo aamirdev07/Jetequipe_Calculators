@@ -12,6 +12,7 @@ const AppShell = styled('div')({
   flexDirection: 'column',
   minHeight: '100vh',
   backgroundColor: theme.palette.background.default,
+  overflowX: 'hidden',
 });
 
 const Main = styled('main')({

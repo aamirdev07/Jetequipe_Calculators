@@ -19,16 +19,19 @@ export default function VelocityResults({ outputs }: VelocityResultsProps) {
     );
   }
 
+  // CIP color rules:
+  // below 5 ft/s → orange (warning) — "Not recommended"
+  // 5-7 ft/s → green (success) — "Minimum recommended range"
+  // above 7 ft/s → green (success) — "Above minimum"
   const chipColor =
-    outputs.cipStatus === 'in-range' ? 'success' :
-    outputs.cipStatus === 'below' ? 'warning' : 'error';
+    outputs.cipStatus === 'below' ? 'warning' : 'success';
 
   const cipMessage =
-    outputs.cipStatus === 'in-range'
-      ? 'Within CIP range (5–7 ft/s)'
-      : outputs.cipStatus === 'below'
-      ? 'Below CIP minimum (5 ft/s)'
-      : 'Exceeds CIP maximum (7 ft/s)';
+    outputs.cipStatus === 'below'
+      ? 'Below CIP minimum (5 ft/s) — Not recommended'
+      : outputs.cipStatus === 'in-range'
+      ? 'Within CIP range (5–7 ft/s) — Minimum recommended'
+      : 'Above CIP minimum (> 7 ft/s)';
 
   return (
     <Stack spacing={2}>
@@ -64,7 +67,7 @@ export default function VelocityResults({ outputs }: VelocityResultsProps) {
       </Paper>
 
       <Alert
-        severity={chipColor === 'success' ? 'success' : chipColor === 'warning' ? 'warning' : 'error'}
+        severity={chipColor === 'success' ? 'success' : 'warning'}
         icon={false}
         sx={{ alignItems: 'center', py: 1 }}
       >

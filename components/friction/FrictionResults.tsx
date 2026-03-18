@@ -100,7 +100,7 @@ export default function FrictionResults({ outputs }: FrictionResultsProps) {
         <Stack spacing={0.5}>
           <LossRow label="Major loss (pipe friction)" value={outputs.majorLossM} />
           <LossRow label="Minor loss (fittings)" value={outputs.minorLossM} />
-          <LossRow label="Static head (elevation)" value={outputs.staticHeadM} />
+          <LossRow label="Static head (rise)" value={outputs.staticHeadM} />
           <LossRow label="Additional losses" value={outputs.additionalLossM} />
         </Stack>
       </Paper>

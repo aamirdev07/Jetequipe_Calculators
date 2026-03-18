@@ -89,12 +89,12 @@ export default function FrictionForm({ inputs, onChange }: FrictionFormProps) {
           >
             <MenuItem value="GPM">GPM</MenuItem>
             <MenuItem value="LPM">L/min</MenuItem>
-            <MenuItem value="m3h">m\u00B3/h</MenuItem>
+            <MenuItem value="m3h">m³/h</MenuItem>
           </TextField>
         </Grid>
         <Grid item xs={6}>
           <InputField
-            label="Viscosity (\u03BC)"
+            label="Viscosity (μ)"
             value={inputs.viscosity}
             onChange={(v) => update({ viscosity: v })}
             unit="cP"
@@ -108,7 +108,8 @@ export default function FrictionForm({ inputs, onChange }: FrictionFormProps) {
             label="Temperature"
             value={inputs.temperature}
             onChange={(v) => update({ temperature: v })}
-            unit="\u00B0C"
+            unit="°C"
+            helperText="Reference only — adjust viscosity for temperature"
           />
         </Grid>
         <Grid item xs={12}>
@@ -177,12 +178,12 @@ export default function FrictionForm({ inputs, onChange }: FrictionFormProps) {
         onChange={(field, value) => update({ [field]: value })}
       />
 
-      {/* Elevation & Additional Losses */}
-      <SectionTitle title="Elevation &amp; Additional Losses" />
+      {/* Rise & Additional Losses */}
+      <SectionTitle title="Rise &amp; Additional Losses" />
       <Grid container spacing={1.5}>
         <Grid item xs={8}>
           <InputField
-            label="Elevation Change (\u0394z)"
+            label="Rise (Δz)"
             value={inputs.elevationChange}
             onChange={(v) => update({ elevationChange: v })}
           />
@@ -219,10 +220,10 @@ export default function FrictionForm({ inputs, onChange }: FrictionFormProps) {
             size="small"
             sx={{ mb: 1.5 }}
           >
-            <MenuItem value="PSI">PSI</MenuItem>
-            <MenuItem value="FT">FT (head)</MenuItem>
-            <MenuItem value="M">M (head)</MenuItem>
-            <MenuItem value="BAR">BAR</MenuItem>
+            <MenuItem value="PSI">psi</MenuItem>
+            <MenuItem value="FT">ft (head)</MenuItem>
+            <MenuItem value="M">m (head)</MenuItem>
+            <MenuItem value="BAR">bar</MenuItem>
           </TextField>
         </Grid>
       </Grid>

@@ -15,6 +15,7 @@ import PipeDrawing2D from '@/components/velocity/PipeDrawing2D';
 import CalcPageHeader from '@/components/shared/CalcPageHeader';
 import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
 import { VelocityInputs } from '@/lib/types';
+import { PIPE_SIZES } from '@/lib/config/pipeData';
 import { calculateFluidVelocity } from '@/lib/calculations/fluidVelocity';
 import { FadeInView } from '@/components/shared/MotionWrapper';
 
@@ -24,18 +25,17 @@ export default function FluidVelocityPage() {
   const [inputs, setInputs] = useState<VelocityInputs>(VELOCITY_DEFAULTS);
   const outputs = useMemo(() => calculateFluidVelocity(inputs), [inputs]);
 
-  const diameterMm =
-    inputs.pipeDiameterUnit === 'mm'
-      ? inputs.pipeDiameter
-      : inputs.pipeDiameter * 25.4;
+  const pipeInfo = PIPE_SIZES.find((p) => p.nominal_in === inputs.nominalDiameter);
+  const diameterMm = pipeInfo ? pipeInfo.id_m * 1000 : 51;
 
-  const flowUnitMap: Record<string, string> = { m3h: 'm³/h', Lmin: 'L/min', Ls: 'L/s', GPM: 'GPM' };
+  const flowUnitMap: Record<string, string> = { m3h: 'm³/h', Lmin: 'L/min', GPM: 'GPM' };
 
   const exportRows: ExportRow[] = useMemo(() => {
     if (outputs.error) return [];
     return [
       { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit]}` },
-      { label: 'Pipe Diameter', value: `${inputs.pipeDiameter} ${inputs.pipeDiameterUnit}` },
+      { label: 'Nominal Pipe Size', value: pipeInfo?.label ?? String(inputs.nominalDiameter) },
+      { label: 'Actual ID', value: `${pipeInfo?.id_in ?? ''}″` },
       { label: 'Velocity', value: `${outputs.velocityMs.toFixed(2)} m/s (${outputs.velocityFts.toFixed(2)} ft/s)` },
       { label: 'CIP Status', value: outputs.cipLabel },
     ];
@@ -79,8 +79,8 @@ export default function FluidVelocityPage() {
                 <PipeDrawing2D
                   diameterMm={diameterMm}
                   velocityMs={outputs.velocityMs}
-                  diameterUnit={inputs.pipeDiameterUnit}
-                  diameterValue={inputs.pipeDiameter}
+                  diameterUnit="in"
+                  diameterValue={pipeInfo?.id_in ?? 0}
                 />
               </Paper>
             </FadeInView>

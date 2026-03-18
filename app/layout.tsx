@@ -6,7 +6,8 @@ export const metadata: Metadata = {
   description:
     'Free engineering calculators for process engineers — pipe sizing, tank geometry, friction loss, and NPSH analysis. By Jetequip.',
   icons: {
-    icon: 'https://jetequip.com/favicon.ico',
+    icon: '/Jetequip-Couleur-Sans-Mention.png',
+    apple: '/Jetequip-Couleur-Sans-Mention.png',
   },
 };
 

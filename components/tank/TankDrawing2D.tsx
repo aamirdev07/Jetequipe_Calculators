@@ -38,6 +38,7 @@ export default function TankDrawing2D({ outputs, innerDiameter, unitSystem }: Ta
   const H_cyl = outputs.cylinderHeight;
   const H_cone = outputs.coneHeight;
   const H_total = outputs.totalHeight;
+  const H_liquid = outputs.liquidHeight;
 
   // SVG dimensions and scaling
   const svgWidth = 400;
@@ -67,8 +68,26 @@ export default function TankDrawing2D({ outputs, innerDiameter, unitSystem }: Ta
   const cylBottomRight = { x: offsetX + tankW, y: offsetY + cylH };
   const coneBottom = { x: offsetX + tankW / 2, y: offsetY + totalH };
 
-  // Liquid level (80% of total volume → visually approximate)
-  const liquidY = offsetY + totalH * 0.15;
+  // Liquid level based on liquid height from the bottom
+  // The liquid fills from the cone bottom upward
+  const liquidHeightScaled = (H_liquid / H_total) * totalH;
+  const liquidY = offsetY + totalH - liquidHeightScaled;
+
+  // Calculate liquid polygon points
+  const getLiquidPoints = (): string => {
+    if (H_liquid <= 0) return '';
+
+    if (liquidHeightScaled <= coneH) {
+      // Liquid is only in the cone
+      const fraction = liquidHeightScaled / coneH;
+      const halfWidthAtLevel = (tankW / 2) * fraction;
+      const centerX = offsetX + tankW / 2;
+      return `${centerX - halfWidthAtLevel},${liquidY} ${centerX + halfWidthAtLevel},${liquidY} ${coneBottom.x},${coneBottom.y}`;
+    } else {
+      // Liquid fills cone + part of cylinder
+      return `${offsetX},${liquidY} ${offsetX + tankW},${liquidY} ${cylBottomRight.x},${cylBottomRight.y} ${coneBottom.x},${coneBottom.y} ${cylBottomLeft.x},${cylBottomLeft.y}`;
+    }
+  };
 
   // Dimension line positions
   const dimLineLeft = offsetX - 35;
@@ -86,25 +105,12 @@ export default function TankDrawing2D({ outputs, innerDiameter, unitSystem }: Ta
         <rect x="0" y="0" width={svgWidth} height={svgHeight} fill="#F8FAFC" rx="8" />
 
         {/* Tank fill — liquid area */}
-        <clipPath id="tankClip">
+        {H_liquid > 0 && (
           <polygon
-            points={`
-              ${topLeft.x},${liquidY}
-              ${topRight.x},${liquidY}
-              ${cylBottomRight.x},${cylBottomRight.y}
-              ${coneBottom.x},${coneBottom.y}
-              ${cylBottomLeft.x},${cylBottomLeft.y}
-            `}
+            points={getLiquidPoints()}
+            fill="#E3F2FD"
           />
-        </clipPath>
-        <rect
-          x={topLeft.x}
-          y={liquidY}
-          width={tankW}
-          height={totalH}
-          fill="#E3F2FD"
-          clipPath="url(#tankClip)"
-        />
+        )}
 
         {/* Tank outline */}
         {/* Flat lid */}
@@ -146,17 +152,39 @@ export default function TankDrawing2D({ outputs, innerDiameter, unitSystem }: Ta
         />
 
         {/* Liquid level dashed line */}
-        <line
-          x1={topLeft.x + 4} y1={liquidY}
-          x2={topRight.x - 4} y2={liquidY}
-          stroke="#1976D2" strokeWidth={1} strokeDasharray="4,3" opacity={0.7}
-        />
-        <text
-          x={topRight.x + 8} y={liquidY + 4}
-          fill="#1976D2" fontSize="10" fontFamily="Inter, sans-serif"
-        >
-          Liquid level
-        </text>
+        {H_liquid > 0 && H_liquid < H_total && (
+          <>
+            {liquidHeightScaled <= coneH ? (
+              <>
+                {/* Liquid line within cone */}
+                {(() => {
+                  const fraction = liquidHeightScaled / coneH;
+                  const halfW = (tankW / 2) * fraction;
+                  const centerX = offsetX + tankW / 2;
+                  return (
+                    <line
+                      x1={centerX - halfW + 4} y1={liquidY}
+                      x2={centerX + halfW - 4} y2={liquidY}
+                      stroke="#1976D2" strokeWidth={1} strokeDasharray="4,3" opacity={0.7}
+                    />
+                  );
+                })()}
+              </>
+            ) : (
+              <line
+                x1={topLeft.x + 4} y1={liquidY}
+                x2={topRight.x - 4} y2={liquidY}
+                stroke="#1976D2" strokeWidth={1} strokeDasharray="4,3" opacity={0.7}
+              />
+            )}
+            <text
+              x={topRight.x + 8} y={liquidY + 4}
+              fill="#1976D2" fontSize="10" fontFamily="Inter, sans-serif"
+            >
+              Liquid level
+            </text>
+          </>
+        )}
 
         {/* Dimension: Diameter (top) */}
         <line
@@ -220,30 +248,26 @@ export default function TankDrawing2D({ outputs, innerDiameter, unitSystem }: Ta
           </>
         )}
 
-        {/* Dimension: Cone height (left, below cylinder) */}
-        {coneH > 5 && (
+        {/* Dimension: Liquid height (inside, from bottom to liquid level) */}
+        {H_liquid > 0 && H_liquid < H_total && (
           <>
             <line
-              x1={dimLineLeft} y1={cylBottomLeft.y}
-              x2={dimLineLeft} y2={coneBottom.y}
-              stroke="#5A6A7A" strokeWidth={1}
-              markerStart="url(#arrowUp)" markerEnd="url(#arrowDown)"
+              x1={offsetX + tankW / 2 + 20} y1={liquidY}
+              x2={offsetX + tankW / 2 + 20} y2={coneBottom.y}
+              stroke="#1976D2" strokeWidth={1}
+              markerStart="url(#arrowUpBlue)" markerEnd="url(#arrowDownBlue)"
             />
-            <line x1={dimLineLeft - 5} y1={cylBottomLeft.y} x2={dimLineLeft + 5} y2={cylBottomLeft.y} stroke="#5A6A7A" strokeWidth={0.5} />
-            <line x1={dimLineLeft - 5} y1={coneBottom.y} x2={dimLineLeft + 5} y2={coneBottom.y} stroke="#5A6A7A" strokeWidth={0.5} />
             <text
-              x={dimLineLeft - 4} y={cylBottomLeft.y + coneH / 2}
-              fill="#5A6A7A" fontSize="9" fontFamily="Inter, sans-serif"
-              textAnchor="end"
+              x={offsetX + tankW / 2 + 25} y={(liquidY + coneBottom.y) / 2}
+              fill="#1976D2" fontSize="9" fontWeight="600" fontFamily="Inter, sans-serif"
             >
-              H_cone
+              H_liq
             </text>
             <text
-              x={dimLineLeft - 4} y={cylBottomLeft.y + coneH / 2 + 12}
-              fill="#5A6A7A" fontSize="9" fontFamily="Inter, sans-serif"
-              textAnchor="end"
+              x={offsetX + tankW / 2 + 25} y={(liquidY + coneBottom.y) / 2 + 12}
+              fill="#1976D2" fontSize="9" fontFamily="Inter, sans-serif"
             >
-              {H_cone} {unit}
+              {H_liquid} {unit}
             </text>
           </>
         )}
@@ -261,6 +285,12 @@ export default function TankDrawing2D({ outputs, innerDiameter, unitSystem }: Ta
           </marker>
           <marker id="arrowUp" markerWidth="6" markerHeight="8" refX="3" refY="0" orient="auto">
             <polygon points="0 8, 6 8, 3 0" fill="#5A6A7A" />
+          </marker>
+          <marker id="arrowDownBlue" markerWidth="6" markerHeight="8" refX="3" refY="8" orient="auto">
+            <polygon points="0 0, 6 0, 3 8" fill="#1976D2" />
+          </marker>
+          <marker id="arrowUpBlue" markerWidth="6" markerHeight="8" refX="3" refY="0" orient="auto">
+            <polygon points="0 8, 6 8, 3 0" fill="#1976D2" />
           </marker>
         </defs>
       </svg>

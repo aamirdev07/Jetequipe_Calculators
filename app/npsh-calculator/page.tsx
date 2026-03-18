@@ -24,7 +24,7 @@ export default function NpshCalculatorPage() {
   const [inputs, setInputs] = useState<NpshInputs>(NPSH_DEFAULTS_IMPERIAL);
   const outputs = useMemo(() => calculateNpsh(inputs), [inputs]);
   const unitLabel = inputs.unitSystem === 'imperial' ? 'ft' : 'm';
-  const pressureUnit = inputs.unitSystem === 'imperial' ? 'psi' : 'bar';
+  const pressureUnit = inputs.pressureInputUnit;
 
   const exportRows: ExportRow[] = useMemo(() => {
     if (outputs.error) return [];
@@ -84,6 +84,7 @@ export default function NpshCalculatorPage() {
                 <NpshDiagram
                   staticHeight={inputs.staticHeight}
                   unitLabel={unitLabel}
+                  outputs={outputs}
                 />
               </Paper>
             </FadeInView>

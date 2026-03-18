@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Grid, MenuItem, TextField, Button, Stack } from '@mui/material';
+import { Grid, MenuItem, TextField, Button, Stack, ToggleButtonGroup, ToggleButton, Typography } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import UnitToggle from '@/components/shared/UnitToggle';
 import SectionTitle from '@/components/shared/SectionTitle';
 import InputField from '@/components/shared/InputField';
-import { NpshInputs, UnitSystem } from '@/lib/types';
+import { NpshInputs, NpshPressureInputUnit, UnitSystem } from '@/lib/types';
 import { FLUID_PRESETS } from '@/lib/config/fluidData';
 
 interface NpshFormProps {
@@ -16,6 +16,7 @@ interface NpshFormProps {
 
 export const NPSH_DEFAULTS_IMPERIAL: NpshInputs = {
   unitSystem: 'imperial',
+  pressureInputUnit: 'psi',
   atmosphericPressure: 14.7,
   sourcePressure: 0,
   staticHeight: 0,
@@ -26,6 +27,7 @@ export const NPSH_DEFAULTS_IMPERIAL: NpshInputs = {
 
 export const NPSH_DEFAULTS_METRIC: NpshInputs = {
   unitSystem: 'metric',
+  pressureInputUnit: 'bar',
   atmosphericPressure: 1.01325,
   sourcePressure: 0,
   staticHeight: 0,
@@ -36,11 +38,10 @@ export const NPSH_DEFAULTS_METRIC: NpshInputs = {
 
 export default function NpshForm({ inputs, onChange }: NpshFormProps) {
   const isMetric = inputs.unitSystem === 'metric';
-  const pressUnit = isMetric ? 'bar' : 'psi';
+  const pressUnit = inputs.pressureInputUnit;
   const lenUnit = isMetric ? 'm' : 'ft';
 
   const handleUnitChange = (newUnit: UnitSystem) => {
-    // Reset to proper defaults when switching units to avoid floating-point drift
     if (newUnit === 'metric') {
       onChange(NPSH_DEFAULTS_METRIC);
     } else {
@@ -48,12 +49,61 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
     }
   };
 
+  const handlePressureUnitChange = (_: React.MouseEvent, newUnit: NpshPressureInputUnit | null) => {
+    if (!newUnit) return;
+    // Reset to defaults with the new pressure unit
+    if (isMetric) {
+      if (newUnit === 'm') {
+        // Convert bar defaults to metres of head (approx: 1 bar ≈ 10.2 m / SG)
+        const sg = inputs.specificGravity || 1;
+        onChange({
+          ...inputs,
+          pressureInputUnit: 'm',
+          atmosphericPressure: parseFloat((inputs.atmosphericPressure * 10.1972 / sg).toFixed(2)),
+          sourcePressure: parseFloat((inputs.sourcePressure * 10.1972 / sg).toFixed(2)),
+          vaporPressure: parseFloat((inputs.vaporPressure * 10.1972 / sg).toFixed(4)),
+        });
+      } else {
+        // bar — reset to defaults
+        onChange({ ...NPSH_DEFAULTS_METRIC, specificGravity: inputs.specificGravity });
+      }
+    } else {
+      if (newUnit === 'ft') {
+        // Convert psi to ft of head (approx: 1 psi ≈ 2.31 ft / SG)
+        const sg = inputs.specificGravity || 1;
+        onChange({
+          ...inputs,
+          pressureInputUnit: 'ft',
+          atmosphericPressure: parseFloat((inputs.atmosphericPressure * 2.31 / sg).toFixed(2)),
+          sourcePressure: parseFloat((inputs.sourcePressure * 2.31 / sg).toFixed(2)),
+          vaporPressure: parseFloat((inputs.vaporPressure * 2.31 / sg).toFixed(4)),
+        });
+      } else {
+        // psi — reset to defaults
+        onChange({ ...NPSH_DEFAULTS_IMPERIAL, specificGravity: inputs.specificGravity });
+      }
+    }
+  };
+
   const handleFluidPreset = (index: number) => {
     const preset = FLUID_PRESETS[index];
     if (preset.label === 'Custom') return;
+
+    let vp: number;
+    if (pressUnit === 'psi') {
+      vp = preset.vaporPressurePsi;
+    } else if (pressUnit === 'bar') {
+      vp = preset.vaporPressureBar;
+    } else if (pressUnit === 'ft') {
+      vp = preset.vaporPressurePsi * 2.31 / preset.specificGravity;
+    } else {
+      // m
+      vp = preset.vaporPressureBar * 10.1972 / preset.specificGravity;
+    }
+
     onChange({
       ...inputs,
-      vaporPressure: isMetric ? preset.vaporPressureBar : preset.vaporPressurePsi,
+      vaporPressure: parseFloat(vp.toFixed(4)),
       specificGravity: preset.specificGravity,
     });
   };
@@ -61,6 +111,10 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
   const handleReset = () => {
     onChange(isMetric ? NPSH_DEFAULTS_METRIC : NPSH_DEFAULTS_IMPERIAL);
   };
+
+  const pressureOptions = isMetric
+    ? [{ value: 'bar', label: 'bar' }, { value: 'm', label: 'm (head)' }]
+    : [{ value: 'psi', label: 'psi' }, { value: 'ft', label: 'ft (head)' }];
 
   return (
     <Stack spacing={0}>
@@ -91,12 +145,29 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
         {FLUID_PRESETS.map((preset, i) => (
           <MenuItem key={preset.label} value={i} disabled={preset.label === 'Custom'}>
             {preset.label}
-            {preset.label !== 'Custom' && ` (VP: ${isMetric ? preset.vaporPressureBar : preset.vaporPressurePsi} ${pressUnit}, SG: ${preset.specificGravity})`}
+            {preset.label !== 'Custom' && ` (VP: ${isMetric ? preset.vaporPressureBar : preset.vaporPressurePsi} ${isMetric ? 'bar' : 'psi'}, SG: ${preset.specificGravity})`}
           </MenuItem>
         ))}
       </TextField>
 
       <SectionTitle title="System Pressures" />
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+        <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.75rem' }}>
+          Pressure unit:
+        </Typography>
+        <ToggleButtonGroup
+          value={pressUnit}
+          exclusive
+          onChange={handlePressureUnitChange}
+          size="small"
+        >
+          {pressureOptions.map((opt) => (
+            <ToggleButton key={opt.value} value={opt.value} sx={{ py: 0.25, px: 1.5, fontSize: '0.75rem' }}>
+              {opt.label}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Stack>
       <Grid container spacing={1.5}>
         <Grid item xs={12}>
           <InputField
