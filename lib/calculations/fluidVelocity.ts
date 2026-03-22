@@ -1,5 +1,5 @@
 import { VelocityInputs, VelocityOutputs } from '@/lib/types';
-import { m3hToM3s, lpmToM3s, gpmToM3s, msToFts } from '@/lib/conversions';
+import { m3hToM3s, gpmToM3s, msToFts } from '@/lib/conversions';
 import { getPipeInternalDiameter } from '@/lib/config/pipeData';
 
 export function calculateFluidVelocity(inputs: VelocityInputs): VelocityOutputs {
@@ -15,10 +15,9 @@ export function calculateFluidVelocity(inputs: VelocityInputs): VelocityOutputs 
   // Convert flow rate to m³/s
   let Q_m3s: number;
   switch (flowRateUnit) {
-    case 'm3h':  Q_m3s = m3hToM3s(flowRate); break;
-    case 'Lmin': Q_m3s = lpmToM3s(flowRate); break;
-    case 'GPM':  Q_m3s = gpmToM3s(flowRate); break;
-    default:     Q_m3s = m3hToM3s(flowRate);
+    case 'm3h': Q_m3s = m3hToM3s(flowRate); break;
+    case 'GPM': Q_m3s = gpmToM3s(flowRate); break;
+    default:    Q_m3s = gpmToM3s(flowRate);
   }
 
   // Area and velocity

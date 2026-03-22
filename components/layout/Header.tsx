@@ -50,7 +50,7 @@ export default function Header() {
               <img
                 src="/Jetequip-Couleur-Sans-Mention.png"
                 alt="Jetequip"
-                style={{ height: 38, objectFit: 'contain' }}
+                style={{ height: 44, objectFit: 'contain' }}
               />
             </a>
             <Stack

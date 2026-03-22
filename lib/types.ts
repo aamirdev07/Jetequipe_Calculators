@@ -11,7 +11,7 @@ export type UnitSystem = 'metric' | 'imperial';
 export interface TankInputs {
   unitSystem: UnitSystem;
   innerDiameter: number; // mm (metric) or in (imperial)
-  workingVolume: number; // L (metric) or gal (imperial)
+  totalVolume: number; // L (metric) or gal (imperial)
   coneAngle: number; // degrees
   fillPercentage: number; // 0–100
 }
@@ -23,7 +23,7 @@ export interface TankOutputs {
   liquidHeight: number; // mm (metric) or in (imperial)
   hdRatio: number; // dimensionless
   totalVolume: number; // L (metric) or gal (imperial)
-  totalVolumeM3: number; // always m³ for display
+  workingVolume: number; // L (metric) or gal (imperial) — totalVolume × fillPercentage
   error: string | null;
 }
 
@@ -77,7 +77,7 @@ export interface FrictionOutputs {
 // Fluid Velocity Calculator Types
 // ============================================
 
-export type VelocityFlowUnit = 'm3h' | 'Lmin' | 'GPM';
+export type VelocityFlowUnit = 'm3h' | 'GPM';
 
 export interface VelocityInputs {
   flowRate: number;
@@ -141,6 +141,7 @@ export interface PipeSize {
   label: string;
   id_m: number;
   id_in: number;
+  wall_in: number;
 }
 
 export interface FittingsKValues {

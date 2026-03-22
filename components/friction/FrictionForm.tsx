@@ -150,6 +150,8 @@ export default function FrictionForm({ inputs, onChange }: FrictionFormProps) {
             value={inputs.pipeLength}
             onChange={(v) => update({ pipeLength: v })}
             min={0}
+            error={inputs.pipeLength < 0}
+            helperText={inputs.pipeLength < 0 ? 'Cannot be negative' : ''}
           />
         </Grid>
         <Grid item xs={4}>

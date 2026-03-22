@@ -37,7 +37,7 @@ export default function TankResults({ outputs, unitSystem }: TankResultsProps) {
   return (
     <Grid container spacing={1.5}>
       <Grid item xs={6}>
-        <ResultCard label="Cylinder Height" value={outputs.cylinderHeight.toLocaleString()} unit={lenUnit} compact accentColor={BLUE} />
+        <ResultCard label="Cone Height" value={outputs.coneHeight.toLocaleString()} unit={lenUnit} compact accentColor={BLUE} />
       </Grid>
       <Grid item xs={6}>
         <ResultCard label="Total Height" value={outputs.totalHeight.toLocaleString()} unit={lenUnit} compact accentColor={GREEN} />
@@ -49,7 +49,7 @@ export default function TankResults({ outputs, unitSystem }: TankResultsProps) {
         <ResultCard label="Total Volume" value={outputs.totalVolume.toLocaleString()} unit={volUnit} compact accentColor={GREEN} />
       </Grid>
       <Grid item xs={6}>
-        <ResultCard label="Total Volume" value={outputs.totalVolumeM3.toFixed(4)} unit="m³" compact />
+        <ResultCard label="Working Volume" value={outputs.workingVolume.toLocaleString()} unit={volUnit} compact accentColor={BLUE} />
       </Grid>
       <Grid item xs={6}>
         <Paper

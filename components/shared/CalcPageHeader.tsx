@@ -44,7 +44,6 @@ export default function CalcPageHeader({ title, subtitle, breadcrumbLabel, accen
               sx={{
                 width: 40,
                 height: 40,
-                borderRadius: 0,
                 bgcolor: 'rgba(255,255,255,0.15)',
                 color: '#fff',
                 display: { xs: 'none', sm: 'flex' },

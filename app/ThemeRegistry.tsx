@@ -28,14 +28,13 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
         <Main>{children}</Main>
         <Footer />
       </AppShell>
-      {/* Print styles */}
+      {/* Print styles — only recap section prints */}
       <style jsx global>{`
         @media print {
           header, footer, nav,
           .no-print,
           [class*="MuiAppBar"],
-          [class*="Header"],
-          button {
+          [class*="Header"] {
             display: none !important;
           }
           body {
@@ -45,6 +44,31 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
           }
           main {
             padding: 0 !important;
+          }
+          /* Hide everything in grid except accordion (recap) */
+          [class*="MuiGrid-container"] > [class*="MuiGrid-item"] > [class*="MuiPaper"] {
+            display: none !important;
+          }
+          /* Show accordion (recap section) */
+          [class*="MuiAccordion"] {
+            display: block !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
+          [class*="MuiAccordion"] [class*="MuiAccordionSummary"] {
+            display: none !important;
+          }
+          [class*="MuiAccordion"] [class*="MuiAccordionDetails"] {
+            display: block !important;
+            padding: 0 !important;
+          }
+          [class*="MuiAccordion"] .no-print {
+            display: none !important;
+          }
+          /* Show the calc page header for context */
+          [class*="CalcPageHeader"],
+          main > div:first-child {
+            display: block !important;
           }
         }
       `}</style>

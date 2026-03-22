@@ -4,7 +4,7 @@ import { createTheme, alpha } from '@mui/material/styles';
 
 const PRIMARY = '#0072CE';
 const SECONDARY = '#00A859';
-const R = 0; // global border-radius — sharp rectangles
+const R = 4; // global border-radius — subtle rounded rectangles
 
 const theme = createTheme({
   palette: {
@@ -186,17 +186,17 @@ const theme = createTheme({
         thumb: {
           width: 18,
           height: 18,
-          borderRadius: R,
+          borderRadius: '50%',
           transition: 'box-shadow 0.2s ease',
           '&:hover, &.Mui-focusVisible': {
             boxShadow: `0 0 0 8px ${alpha(PRIMARY, 0.16)}`,
           },
         },
         track: {
-          borderRadius: R,
+          borderRadius: 3,
         },
         rail: {
-          borderRadius: R,
+          borderRadius: 3,
           opacity: 0.25,
         },
       },

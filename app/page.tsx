@@ -25,21 +25,26 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FadeIn, FadeInView, StaggerContainer, StaggerItem } from '@/components/shared/MotionWrapper';
-import ImageCarousel, { CarouselSlide } from '@/components/shared/ImageCarousel';
 import HeroBackground from '@/components/shared/HeroBackground';
+import ImageCarousel, { CarouselSlide } from '@/components/shared/ImageCarousel';
 
+// Hero background images (Top folder)
+const heroImages = [
+  '/pictures/Top/MACHINE-3.jpg',
+  '/pictures/Top/Machine-9.jpg',
+  '/pictures/Top/Machine-LOWRES-6.jpg',
+  '/pictures/Top/JetEquip-batch2 (16 of 4).jpg',
+  '/pictures/Top/Untitled design (1).png',
+];
+
+// Product carousel slides (Bottom folder)
 const productSlides: CarouselSlide[] = [
-  {
-    src: '/cuve.jpg',
-    alt: 'Sanitary processing station with conical-bottom tank',
-    caption: 'Sanitary processing station with conical-bottom tank and hopper',
-  },
-  {
-    src: '/Cart-Stand-Custom-Fabrication-1-1200x1196.jpg',
-    alt: 'Custom mobile pump cart',
-    caption: 'Custom mobile pump cart with sanitary centrifugal pump',
-  },
-  // Add more slides here as the client provides images
+  { src: '/pictures/Bottom/JET-DU.png', alt: 'Jetequip custom fabrication' },
+  { src: '/pictures/Bottom/Fristam Lobe Pumps .png', alt: 'Fristam lobe pumps' },
+  { src: '/pictures/Bottom/PCM Delosco Peristaltic pump .png', alt: 'PCM Delosco peristaltic pump' },
+  { src: '/pictures/Bottom/PCM progressive cavity pump .png', alt: 'PCM progressive cavity pump' },
+  { src: '/pictures/Bottom/silverson-in-line-275uhs.png', alt: 'Silverson in-line mixer' },
+  { src: '/pictures/Bottom/silverson-ultramix-on-stand.png', alt: 'Silverson ultramix on stand' },
 ];
 
 interface CalculatorCard {
@@ -113,8 +118,8 @@ const features = [
   },
   {
     icon: <VerifiedIcon sx={{ fontSize: 20, color: '#E65100' }} />,
-    title: 'Sanitary standards',
-    description: 'Built for 3-A & ASME BPE',
+    title: 'Built for Sanitary Process Equipment',
+    description: '',
   },
 ];
 
@@ -135,7 +140,7 @@ export default function HomePage() {
       >
         {/* Auto-cycling background images */}
         <HeroBackground
-          images={productSlides.map((s) => s.src)}
+          images={heroImages}
           intervalMs={6000}
         />
 
@@ -156,7 +161,7 @@ export default function HomePage() {
                 <img
                   src="/Jetequip-Couleur-Sans-Mention.png"
                   alt="Jetequip"
-                  style={{ height: 40, objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9 }}
+                  style={{ height: 48, objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9 }}
                 />
                 <Chip
                   label="Process Solutions"
@@ -182,7 +187,7 @@ export default function HomePage() {
                   maxWidth: 640,
                 }}
               >
-                Engineering Calculators for Process Engineers
+                Calculators for Process Engineering
               </Typography>
               <Typography
                 variant="body1"
@@ -246,7 +251,6 @@ export default function HomePage() {
                       sx={{
                         width: 36,
                         height: 36,
-                        borderRadius: 0,
                         bgcolor: alpha((f.icon as React.ReactElement).props.sx.color, 0.08),
                         flexShrink: 0,
                       }}
@@ -257,9 +261,11 @@ export default function HomePage() {
                       <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.8rem', lineHeight: 1.3 }}>
                         {f.title}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', lineHeight: 1.4 }}>
-                        {f.description}
-                      </Typography>
+                      {f.description && (
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', lineHeight: 1.4 }}>
+                          {f.description}
+                        </Typography>
+                      )}
                     </Stack>
                   </Stack>
                 </Grid>
@@ -322,7 +328,6 @@ export default function HomePage() {
                               sx={{
                                 width: 44,
                                 height: 44,
-                                borderRadius: 0,
                                 bgcolor: alpha(calc.accentColor, 0.1),
                                 color: calc.accentColor,
                                 flexShrink: 0,
@@ -382,35 +387,7 @@ export default function HomePage() {
         </StaggerContainer>
       </Container>
 
-      {/* Product Carousel */}
-      <Stack sx={{ bgcolor: '#F8FAFC', py: { xs: 4, md: 6 }, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Container maxWidth="md">
-          <FadeInView>
-            <Stack sx={{ mb: { xs: 3, md: 4 }, textAlign: 'center' }}>
-              <Typography
-                variant="h5"
-                fontWeight={700}
-                sx={{ fontSize: { xs: '1.2rem', md: '1.4rem' }, mb: 0.5 }}
-              >
-                Built for Sanitary Process Equipment
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
-                Our calculators are designed to support the engineering behind Jetequip's sanitary and aseptic process solutions.
-              </Typography>
-            </Stack>
-          </FadeInView>
-
-          <FadeInView delay={0.1}>
-            <ImageCarousel
-              slides={productSlides}
-              autoPlayMs={5000}
-              height={{ xs: 280, md: 400 }}
-            />
-          </FadeInView>
-        </Container>
-      </Stack>
-
-      {/* Contact Jetequip CTA — prominent section */}
+      {/* Contact Jetequip CTA — prominent section with product carousel */}
       <Stack
         sx={{
           background: 'linear-gradient(135deg, #E65100 0%, #BF360C 100%)',
@@ -443,81 +420,91 @@ export default function HomePage() {
           }}
         />
 
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <FadeInView>
-            <Stack alignItems="center" textAlign="center" spacing={3}>
-              <Typography
-                variant="h4"
-                fontWeight={800}
-                sx={{
-                  color: '#fff',
-                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.15rem' },
-                  lineHeight: 1.2,
-                }}
-              >
-                Need Custom Process Solutions?
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: 'rgba(255,255,255,0.8)',
-                  maxWidth: 520,
-                  fontSize: { xs: '0.9rem', md: '1rem' },
-                  lineHeight: 1.7,
-                }}
-              >
-                Jetequip designs and fabricates sanitary process equipment for food, beverage, dairy, pharmaceutical, and biotech industries. Let our team help you with your next project.
-              </Typography>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                alignItems="center"
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  href="https://jetequip.com/en/joindre/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  endIcon={<OpenInNewIcon sx={{ fontSize: '16px !important' }} />}
-                  sx={{
-                    bgcolor: '#fff',
-                    color: '#E65100',
-                    fontWeight: 700,
-                    px: 4,
-                    py: 1.3,
-                    fontSize: '0.95rem',
-                    '&:hover': {
-                      bgcolor: 'rgba(255,255,255,0.92)',
-                      boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
-                    },
-                  }}
-                >
-                  Contact Jetequip
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  href="https://jetequip.com/en/produits/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    borderColor: 'rgba(255,255,255,0.5)',
-                    color: '#fff',
-                    fontWeight: 600,
-                    px: 3,
-                    py: 1.2,
-                    fontSize: '0.9rem',
-                    '&:hover': {
-                      borderColor: '#fff',
-                      bgcolor: 'rgba(255,255,255,0.1)',
-                    },
-                  }}
-                >
-                  View Products
-                </Button>
-              </Stack>
-            </Stack>
+            <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <Stack spacing={3}>
+                  <Typography
+                    variant="h4"
+                    fontWeight={800}
+                    sx={{
+                      color: '#fff',
+                      fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.15rem' },
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Need Custom Process Solutions?
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: 'rgba(255,255,255,0.85)',
+                      fontSize: { xs: '0.9rem', md: '1rem' },
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    Jetequip sizes, designs, builds and integrates sanitary process solutions for food, beverage, dairy, pharmaceutical, and biotech industries. Let our team help you with your next project.
+                  </Typography>
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={2}
+                    alignItems={{ xs: 'stretch', sm: 'center' }}
+                  >
+                    <Button
+                      variant="contained"
+                      size="large"
+                      href="https://jetequip.com/en/joindre/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      endIcon={<OpenInNewIcon sx={{ fontSize: '16px !important' }} />}
+                      sx={{
+                        bgcolor: '#fff',
+                        color: '#E65100',
+                        fontWeight: 700,
+                        px: 4,
+                        py: 1.3,
+                        fontSize: '0.95rem',
+                        '&:hover': {
+                          bgcolor: 'rgba(255,255,255,0.92)',
+                          boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+                        },
+                      }}
+                    >
+                      Contact Jetequip
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      href="https://jetequip.com/en/produits/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        borderColor: 'rgba(255,255,255,0.5)',
+                        color: '#fff',
+                        fontWeight: 600,
+                        px: 3,
+                        py: 1.2,
+                        fontSize: '0.9rem',
+                        '&:hover': {
+                          borderColor: '#fff',
+                          bgcolor: 'rgba(255,255,255,0.1)',
+                        },
+                      }}
+                    >
+                      View Products
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <ImageCarousel
+                  slides={productSlides}
+                  autoPlayMs={4000}
+                  height={{ xs: 240, md: 320 }}
+                />
+              </Grid>
+            </Grid>
           </FadeInView>
         </Container>
       </Stack>

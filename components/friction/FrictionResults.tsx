@@ -31,7 +31,6 @@ export default function FrictionResults({ outputs }: FrictionResultsProps) {
           p: 2.5,
           bgcolor: alpha(ACCENT, 0.04),
           border: `1px solid ${alpha(ACCENT, 0.15)}`,
-          borderRadius: 0,
         }}
       >
         <Typography variant="caption" color="text.secondary" fontWeight={500} textTransform="uppercase" letterSpacing={0.5} sx={{ mb: 1.5, display: 'block', fontSize: '0.65rem' }}>

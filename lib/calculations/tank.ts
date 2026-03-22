@@ -1,36 +1,40 @@
 import { TankInputs, TankOutputs } from '@/lib/types';
 import { mmToM, inToM, lToM3, galToM3, mToMm, mToIn, m3ToL, m3ToGal } from '@/lib/conversions';
 
-const HEADSPACE_FACTOR = 0.8; // working volume = 80% of total
-
 export function calculateTank(inputs: TankInputs): TankOutputs {
-  const { unitSystem, innerDiameter, workingVolume, coneAngle, fillPercentage } = inputs;
+  const { unitSystem, innerDiameter, totalVolume, coneAngle, fillPercentage } = inputs;
 
   // Convert to SI (metres, m³)
   const D_m = unitSystem === 'metric' ? mmToM(innerDiameter) : inToM(innerDiameter);
-  const V_work_m3 = unitSystem === 'metric' ? lToM3(workingVolume) : galToM3(workingVolume);
+  const V_total_m3 = unitSystem === 'metric' ? lToM3(totalVolume) : galToM3(totalVolume);
 
-  // Total volume including headspace
-  const V_total_m3 = V_work_m3 / HEADSPACE_FACTOR;
-
-  // Geometry
-  const r = D_m / 2;
-  const halfAngleRad = (coneAngle / 2) * Math.PI / 180;
-  const tanHalfAngle = Math.tan(halfAngleRad);
-
-  // Avoid division by zero
-  if (tanHalfAngle === 0 || coneAngle >= 180) {
-    return createErrorOutput('Cone angle must be between 10° and 179°.');
-  }
-
-  const H_cone_m = r / tanHalfAngle;
-  const A = Math.PI * r * r;
-
-  if (A === 0) {
+  if (D_m <= 0) {
     return createErrorOutput('Diameter must be greater than zero.');
   }
 
-  const V_cone_m3 = (1 / 3) * A * H_cone_m;
+  // Geometry
+  const r = D_m / 2;
+  const A = Math.PI * r * r;
+
+  let H_cone_m: number;
+  let V_cone_m3: number;
+
+  if (coneAngle >= 180) {
+    // Flat bottom — standard cylinder, no cone
+    H_cone_m = 0;
+    V_cone_m3 = 0;
+  } else {
+    const halfAngleRad = (coneAngle / 2) * Math.PI / 180;
+    const tanHalfAngle = Math.tan(halfAngleRad);
+
+    if (tanHalfAngle === 0) {
+      return createErrorOutput('Invalid cone angle.');
+    }
+
+    H_cone_m = r / tanHalfAngle;
+    V_cone_m3 = (1 / 3) * A * H_cone_m;
+  }
+
   const V_cyl_m3 = V_total_m3 - V_cone_m3;
 
   if (V_cyl_m3 < 0) {
@@ -39,9 +43,9 @@ export function calculateTank(inputs: TankInputs): TankOutputs {
     );
   }
 
-  const H_cyl_m = V_cyl_m3 / A;
+  const H_cyl_m = A > 0 ? V_cyl_m3 / A : 0;
   const H_total_m = H_cone_m + H_cyl_m;
-  const R = H_total_m / D_m;
+  const R = D_m > 0 ? H_total_m / D_m : 0;
 
   // Calculate liquid height based on fill percentage
   const fillFraction = (fillPercentage ?? 80) / 100;
@@ -59,7 +63,7 @@ export function calculateTank(inputs: TankInputs): TankOutputs {
     liquidHeight: parseFloat(toDisplayLen(H_liquid_m).toFixed(1)),
     hdRatio: parseFloat(R.toFixed(3)),
     totalVolume: parseFloat(toDisplayVol(V_total_m3).toFixed(1)),
-    totalVolumeM3: parseFloat(V_total_m3.toFixed(4)),
+    workingVolume: parseFloat(toDisplayVol(V_liquid_m3).toFixed(1)),
     error: null,
   };
 }
@@ -75,6 +79,11 @@ function calculateLiquidHeight(
   crossSection: number
 ): number {
   if (V_liquid <= 0) return 0;
+
+  // If no cone (flat bottom), liquid is purely in cylinder
+  if (H_cone <= 0) {
+    return crossSection > 0 ? V_liquid / crossSection : 0;
+  }
 
   // Volume of the full cone
   const V_cone = (1 / 3) * crossSection * H_cone;
@@ -102,7 +111,7 @@ function createErrorOutput(error: string): TankOutputs {
     liquidHeight: 0,
     hdRatio: 0,
     totalVolume: 0,
-    totalVolumeM3: 0,
+    workingVolume: 0,
     error,
   };
 }

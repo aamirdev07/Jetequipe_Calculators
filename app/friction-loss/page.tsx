@@ -8,6 +8,8 @@ import {
   Paper,
   Stack,
 } from '@mui/material';
+
+const DISCLAIMER = 'For reference only. Results must be verified by a qualified engineer. Jetequip is not responsible for the results or their interpretation or use.';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import FrictionForm, { FRICTION_DEFAULTS } from '@/components/friction/FrictionForm';
 import FrictionResults from '@/components/friction/FrictionResults';
@@ -26,6 +28,7 @@ export default function FrictionLossPage() {
   const outputs = useMemo(() => calculateFrictionLoss(inputs), [inputs]);
 
   const flowUnitMap: Record<string, string> = { GPM: 'GPM', LPM: 'L/min', m3h: 'm³/h' };
+  const lossUnitMap: Record<string, string> = { PSI: 'psi', FT: 'ft (head)', M: 'm (head)', BAR: 'bar' };
   const pipeLabel = PIPE_SIZES.find((p) => p.nominal_in === inputs.nominalDiameter)?.label ?? String(inputs.nominalDiameter);
 
   const exportRows: ExportRow[] = useMemo(() => {
@@ -42,7 +45,7 @@ export default function FrictionLossPage() {
       { label: 'Ball Valves', value: String(inputs.ballValves) },
       { label: 'Butterfly Valves', value: String(inputs.butterflyValves) },
       { label: 'Rise', value: `${inputs.elevationChange} ${inputs.elevationUnit}` },
-      ...(inputs.additionalLoss > 0 ? [{ label: 'Additional Loss', value: `${inputs.additionalLoss} ${inputs.additionalLossUnit}` }] : []),
+      ...(inputs.additionalLoss > 0 ? [{ label: 'Additional Loss', value: `${inputs.additionalLoss} ${lossUnitMap[inputs.additionalLossUnit] ?? inputs.additionalLossUnit}` }] : []),
       { label: 'Total Head Loss', value: `${outputs.totalHeadLossFt.toFixed(2)} ft (${outputs.totalHeadLossM.toFixed(2)} m)` },
       { label: 'Total Pressure Loss', value: `${outputs.totalPressureLossPsi.toFixed(2)} psi (${outputs.totalPressureLossBar.toFixed(3)} bar)` },
       { label: 'Velocity', value: `${outputs.velocityMs.toFixed(2)} m/s (${outputs.velocityFts.toFixed(2)} ft/s)` },
@@ -88,6 +91,9 @@ export default function FrictionLossPage() {
                 {!outputs.error && (
                   <ExportBar title="Friction Loss Calculator" rows={exportRows} accentColor={ACCENT} />
                 )}
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem', lineHeight: 1.5 }}>
+                  {DISCLAIMER}
+                </Typography>
               </Paper>
             </FadeInView>
 

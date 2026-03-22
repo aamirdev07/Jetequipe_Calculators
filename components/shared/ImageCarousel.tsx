@@ -24,6 +24,7 @@ const CarouselContainer = styled('div')({
   overflow: 'hidden',
   backgroundColor: '#ffffff',
   border: '1px solid #e0e0e0',
+  borderRadius: 4,
 });
 
 const SlideImage = styled(motion.img)({
@@ -169,6 +170,7 @@ export default function ImageCarousel({
               sx={{
                 width: activeIndex === i ? 24 : 8,
                 height: 8,
+                borderRadius: 4,
                 bgcolor: activeIndex === i ? '#0072CE' : alpha('#0072CE', 0.2),
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',

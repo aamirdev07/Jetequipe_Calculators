@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Slider, TextField, Typography, InputAdornment } from '@mui/material';
 import InfoTooltip from './InfoTooltip';
 
@@ -25,15 +25,22 @@ export default function SliderInput({
   unit,
   tooltipText,
 }: SliderInputProps) {
+  const [displayValue, setDisplayValue] = useState<string>(String(value));
+
+  useEffect(() => {
+    setDisplayValue(String(value));
+  }, [value]);
+
   const handleSliderChange = (_event: Event, newValue: number | number[]) => {
     onChange(newValue as number);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    if (raw === '') {
-      onChange(min);
-      return;
+    setDisplayValue(raw);
+
+    if (raw === '' || raw === '-') {
+      return; // allow empty while typing
     }
     const num = parseFloat(raw);
     if (!isNaN(num)) {
@@ -42,8 +49,17 @@ export default function SliderInput({
   };
 
   const handleBlur = () => {
-    if (value < min) onChange(min);
-    else if (value > max) onChange(max);
+    if (displayValue === '' || displayValue === '-') {
+      const fallback = min > 0 ? min : 0;
+      setDisplayValue(String(fallback));
+      onChange(fallback);
+      return;
+    }
+    const num = parseFloat(displayValue);
+    if (!isNaN(num)) {
+      if (num < min) { onChange(min); setDisplayValue(String(min)); }
+      else if (num > max) { onChange(max); setDisplayValue(String(max)); }
+    }
   };
 
   return (
@@ -65,7 +81,7 @@ export default function SliderInput({
           aria-label={label}
         />
         <TextField
-          value={value}
+          value={displayValue}
           onChange={handleInputChange}
           onBlur={handleBlur}
           type="number"

@@ -14,11 +14,13 @@ import NpshResults from '@/components/npsh/NpshResults';
 import NpshDiagram from '@/components/npsh/NpshDiagram';
 import CalcPageHeader from '@/components/shared/CalcPageHeader';
 import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
+import RecapSection, { RecapRow } from '@/components/shared/RecapSection';
 import { NpshInputs } from '@/lib/types';
 import { calculateNpsh } from '@/lib/calculations/npsh';
 import { FadeInView } from '@/components/shared/MotionWrapper';
 
 const ACCENT = '#E65100';
+const DISCLAIMER = 'For reference only. Results must be verified by a qualified engineer. Jetequip is not responsible for the results or their interpretation or use.';
 
 export default function NpshCalculatorPage() {
   const [inputs, setInputs] = useState<NpshInputs>(NPSH_DEFAULTS_IMPERIAL);
@@ -42,7 +44,27 @@ export default function NpshCalculatorPage() {
       { label: 'Static Head', value: `${outputs.staticHead.toFixed(2)} ${unitLabel}` },
       { label: 'Friction Head', value: `${outputs.frictionHead.toFixed(2)} ${unitLabel}` },
       { label: 'Vapor Head', value: `${outputs.vaporHead.toFixed(2)} ${unitLabel}` },
-      { label: 'Risk Level', value: outputs.riskLabel },
+    ];
+  }, [inputs, outputs, unitLabel, pressureUnit]);
+
+  const recapRows: RecapRow[] = useMemo(() => {
+    if (outputs.error) return [];
+    return [
+      { label: 'Unit System', value: inputs.unitSystem },
+      { label: 'Pressure Unit', value: pressureUnit },
+      { label: 'Atmospheric Pressure', value: `${inputs.atmosphericPressure} ${pressureUnit}` },
+      { label: 'Source Pressure', value: `${inputs.sourcePressure} ${pressureUnit}` },
+      { label: 'Static Height', value: `${inputs.staticHeight} ${unitLabel}` },
+      { label: 'Friction Loss', value: `${inputs.frictionLoss} ${unitLabel}` },
+      { label: 'Vapor Pressure', value: `${inputs.vaporPressure} ${pressureUnit}` },
+      { label: 'Specific Gravity', value: String(inputs.specificGravity) },
+      { label: 'Results', value: '', section: true },
+      { label: 'NPSHa', value: `${outputs.npsha.toFixed(2)} ${unitLabel}`, bold: true },
+      { label: 'Atmospheric Head', value: `${outputs.atmosphericHead.toFixed(2)} ${unitLabel}` },
+      { label: 'Source Head', value: `${outputs.sourceHead.toFixed(2)} ${unitLabel}` },
+      { label: 'Static Head', value: `${outputs.staticHead.toFixed(2)} ${unitLabel}` },
+      { label: 'Friction Head', value: `${outputs.frictionHead.toFixed(2)} ${unitLabel}` },
+      { label: 'Vapor Head', value: `${outputs.vaporHead.toFixed(2)} ${unitLabel}` },
     ];
   }, [inputs, outputs, unitLabel, pressureUnit]);
 
@@ -75,11 +97,14 @@ export default function NpshCalculatorPage() {
                 {!outputs.error && (
                   <ExportBar title="NPSH Available Calculator" rows={exportRows} accentColor={ACCENT} />
                 )}
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem', lineHeight: 1.5 }}>
+                  {DISCLAIMER}
+                </Typography>
               </Paper>
             </FadeInView>
 
             <FadeInView delay={0.15}>
-              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5 }}>
                 <SectionLabel color="#0072CE">System Diagram</SectionLabel>
                 <NpshDiagram
                   staticHeight={inputs.staticHeight}
@@ -88,6 +113,12 @@ export default function NpshCalculatorPage() {
                 />
               </Paper>
             </FadeInView>
+
+            {!outputs.error && (
+              <FadeInView delay={0.2}>
+                <RecapSection title="NPSH Available Calculator" rows={recapRows} accentColor={ACCENT} />
+              </FadeInView>
+            )}
           </Grid>
         </Grid>
       </Container>

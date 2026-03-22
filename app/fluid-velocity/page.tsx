@@ -11,35 +11,48 @@ import {
 import SpeedIcon from '@mui/icons-material/Speed';
 import VelocityForm, { VELOCITY_DEFAULTS } from '@/components/velocity/VelocityForm';
 import VelocityResults from '@/components/velocity/VelocityResults';
-import PipeDrawing2D from '@/components/velocity/PipeDrawing2D';
 import CalcPageHeader from '@/components/shared/CalcPageHeader';
 import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
+import RecapSection, { RecapRow } from '@/components/shared/RecapSection';
 import { VelocityInputs } from '@/lib/types';
 import { PIPE_SIZES } from '@/lib/config/pipeData';
 import { calculateFluidVelocity } from '@/lib/calculations/fluidVelocity';
 import { FadeInView } from '@/components/shared/MotionWrapper';
 
 const ACCENT = '#00A859';
+const DISCLAIMER = 'For reference only. Results must be verified by a qualified engineer. Jetequip is not responsible for the results or their interpretation or use.';
 
 export default function FluidVelocityPage() {
   const [inputs, setInputs] = useState<VelocityInputs>(VELOCITY_DEFAULTS);
   const outputs = useMemo(() => calculateFluidVelocity(inputs), [inputs]);
 
   const pipeInfo = PIPE_SIZES.find((p) => p.nominal_in === inputs.nominalDiameter);
-  const diameterMm = pipeInfo ? pipeInfo.id_m * 1000 : 51;
 
-  const flowUnitMap: Record<string, string> = { m3h: 'm³/h', Lmin: 'L/min', GPM: 'GPM' };
+  const flowUnitMap: Record<string, string> = { m3h: 'm³/h', GPM: 'GPM' };
 
   const exportRows: ExportRow[] = useMemo(() => {
     if (outputs.error) return [];
     return [
-      { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit]}` },
+      { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit] ?? inputs.flowRateUnit}` },
       { label: 'Nominal Pipe Size', value: pipeInfo?.label ?? String(inputs.nominalDiameter) },
       { label: 'Actual ID', value: `${pipeInfo?.id_in ?? ''}″` },
       { label: 'Velocity', value: `${outputs.velocityMs.toFixed(2)} m/s (${outputs.velocityFts.toFixed(2)} ft/s)` },
       { label: 'CIP Status', value: outputs.cipLabel },
     ];
   }, [inputs, outputs]);
+
+  const recapRows: RecapRow[] = useMemo(() => {
+    if (outputs.error) return [];
+    return [
+      { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit] ?? inputs.flowRateUnit}` },
+      { label: 'Nominal Pipe Size', value: pipeInfo?.label ?? String(inputs.nominalDiameter) },
+      { label: 'Actual ID', value: `${pipeInfo?.id_in ?? ''}″` },
+      { label: 'Wall Thickness', value: `${pipeInfo?.wall_in ?? ''}″` },
+      { label: 'Results', value: '', section: true },
+      { label: 'Velocity', value: `${outputs.velocityMs.toFixed(2)} m/s (${outputs.velocityFts.toFixed(2)} ft/s)`, bold: true },
+      { label: 'CIP Status', value: outputs.cipLabel },
+    ];
+  }, [inputs, outputs, pipeInfo]);
 
   return (
     <>
@@ -64,26 +77,32 @@ export default function FluidVelocityPage() {
 
           <Grid item xs={12} md={7}>
             <FadeInView delay={0.1}>
-              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5 }}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: { xs: 2, sm: 2.5 },
+                  position: 'sticky',
+                  top: 64,
+                }}
+              >
                 <SectionLabel color={ACCENT}>Results</SectionLabel>
                 <VelocityResults outputs={outputs} />
                 {!outputs.error && (
                   <ExportBar title="Fluid Velocity Calculator" rows={exportRows} accentColor={ACCENT} />
                 )}
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem', lineHeight: 1.5 }}>
+                  {DISCLAIMER}
+                </Typography>
               </Paper>
             </FadeInView>
 
-            <FadeInView delay={0.15}>
-              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
-                <SectionLabel color="#0072CE">Pipe Diagram</SectionLabel>
-                <PipeDrawing2D
-                  diameterMm={diameterMm}
-                  velocityMs={outputs.velocityMs}
-                  diameterUnit="in"
-                  diameterValue={pipeInfo?.id_in ?? 0}
-                />
-              </Paper>
-            </FadeInView>
+            {!outputs.error && (
+              <FadeInView delay={0.15}>
+                <Stack sx={{ mt: 2.5 }}>
+                  <RecapSection title="Fluid Velocity Calculator" rows={recapRows} accentColor={ACCENT} />
+                </Stack>
+              </FadeInView>
+            )}
           </Grid>
         </Grid>
       </Container>

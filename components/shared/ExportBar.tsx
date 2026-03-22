@@ -24,7 +24,7 @@ function toCsv(title: string, rows: ExportRow[]): string {
     '"Parameter","Value"',
     ...rows.map((r) => `"${r.label}","${r.value}"`),
     '',
-    '"For estimation only — verify with a qualified engineer."',
+    '"For reference only. Results must be verified by a qualified engineer."',
     '"Jetequip — jetequip.com"',
   ];
   return lines.join('\n');

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Stack, Chip, Alert, Typography, Paper, alpha } from '@mui/material';
+import { Stack, Alert, Typography, Paper, alpha } from '@mui/material';
 import { NpshOutputs, UnitSystem } from '@/lib/types';
 
 const ACCENT = '#E65100';
@@ -29,7 +29,6 @@ export default function NpshResults({ outputs, unitSystem }: NpshResultsProps) {
           p: 2.5,
           bgcolor: alpha(ACCENT, 0.04),
           border: `1px solid ${alpha(ACCENT, 0.15)}`,
-          borderRadius: 0,
         }}
       >
         <Typography variant="caption" color="text.secondary" fontWeight={500} textTransform="uppercase" letterSpacing={0.5} sx={{ display: 'block', fontSize: '0.65rem' }}>
@@ -38,12 +37,6 @@ export default function NpshResults({ outputs, unitSystem }: NpshResultsProps) {
         <Typography variant="h4" fontWeight={700} sx={{ my: 0.75, fontSize: '1.75rem', color: ACCENT }}>
           {outputs.npsha.toFixed(2)} {unit}
         </Typography>
-        <Chip
-          label={outputs.riskLabel}
-          variant="outlined"
-          size="small"
-          sx={{ fontWeight: 600, height: 24, borderColor: 'divider', color: 'text.primary' }}
-        />
       </Paper>
 
       <Paper variant="outlined" sx={{ p: 2 }}>

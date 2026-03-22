@@ -162,7 +162,7 @@ export default function Footer() {
               variant="caption"
               sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}
             >
-              For estimation only — verify with a qualified engineer.
+              For reference only. Results must be verified by a qualified engineer. Jetequip is not responsible for the results or their interpretation or use.
             </Typography>
           </Stack>
         </Container>

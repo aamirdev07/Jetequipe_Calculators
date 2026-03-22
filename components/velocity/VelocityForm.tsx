@@ -14,7 +14,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
   alpha,
 } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -83,7 +82,6 @@ export default function VelocityForm({ inputs, onChange }: VelocityFormProps) {
           >
             <MenuItem value="GPM">GPM</MenuItem>
             <MenuItem value="m3h">m³/h</MenuItem>
-            <MenuItem value="Lmin">L/min</MenuItem>
           </TextField>
         </Grid>
         <Grid item xs={12}>
@@ -105,13 +103,14 @@ export default function VelocityForm({ inputs, onChange }: VelocityFormProps) {
         </Grid>
       </Grid>
 
-      <SectionTitle title="Sanitary Pipe Reference" />
+      <SectionTitle title="Sanitary Tube Reference" />
       <TableContainer component={Paper} variant="outlined" sx={{ mb: 1.5 }}>
         <Table size="small">
           <TableHead>
             <TableRow sx={{ bgcolor: alpha('#00A859', 0.06) }}>
-              <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Nominal Size</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Actual ID (in)</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Tube OD</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Tube ID (in)</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Wall (in)</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -128,6 +127,9 @@ export default function VelocityForm({ inputs, onChange }: VelocityFormProps) {
                 <TableCell sx={{ fontSize: '0.8rem', py: 0.5 }}>{p.label}</TableCell>
                 <TableCell align="right" sx={{ fontSize: '0.8rem', py: 0.5, fontWeight: p.nominal_in === inputs.nominalDiameter ? 700 : 400 }}>
                   {p.id_in}
+                </TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem', py: 0.5 }}>
+                  {p.wall_in}
                 </TableCell>
               </TableRow>
             ))}
