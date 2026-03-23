@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -28,6 +28,8 @@ interface RecapSectionProps {
   title: string;
   rows: RecapRow[];
   accentColor?: string;
+  /** Ref to a DOM element (e.g. diagram) to include on the right side of the printed PDF */
+  diagramRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 function toCsv(title: string, rows: RecapRow[]): string {
@@ -44,10 +46,102 @@ function toCsv(title: string, rows: RecapRow[]): string {
   return lines.join('\n');
 }
 
-export default function RecapSection({ title, rows, accentColor = '#0072CE' }: RecapSectionProps) {
+function buildPrintHtml(
+  title: string,
+  tableHtml: string,
+  diagramHtml: string | null,
+): string {
+  const disclaimer =
+    'For reference only. Results must be verified by a qualified engineer. Jetequip is not responsible for the results or their interpretation or use.';
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>${title}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Inter, Arial, Helvetica, sans-serif; color: #1a1a2e; padding: 24px; }
+    h1 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 11px; color: #666; margin-bottom: 16px; }
+    .wrap { display: flex; gap: 32px; }
+    .table-side { flex: 1; min-width: 0; }
+    .diagram-side { flex: 1; min-width: 0; display: flex; align-items: flex-start; justify-content: center; }
+    .diagram-side svg { width: 100%; height: auto; max-height: 500px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    td { padding: 4px 8px; border-bottom: 1px solid #eee; }
+    td:first-child { color: #666; width: 45%; }
+    .section-header td { padding-top: 12px; border-bottom: none; font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+    .bold { font-weight: 700; }
+    .disclaimer { font-size: 9px; color: #999; margin-top: 16px; line-height: 1.5; }
+    .footer { font-size: 9px; color: #999; margin-top: 8px; }
+    @media print {
+      body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>${title}</h1>
+  <div class="subtitle">Generated ${new Date().toLocaleString()}</div>
+  <div class="wrap">
+    <div class="table-side">${tableHtml}</div>
+    ${diagramHtml ? `<div class="diagram-side">${diagramHtml}</div>` : ''}
+  </div>
+  <div class="disclaimer">${disclaimer}</div>
+  <div class="footer">Jetequip — jetequip.com</div>
+</body>
+</html>`;
+}
+
+export default function RecapSection({
+  title,
+  rows,
+  accentColor = '#0072CE',
+  diagramRef,
+}: RecapSectionProps) {
+  const tableRef = useRef<HTMLTableElement>(null);
+
   const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
+    // Build table HTML from rows data (not DOM) for clean output
+    const tableHtml = `<table>${rows
+      .map((row) => {
+        if (row.section) {
+          return `<tr class="section-header"><td colspan="2">${row.label}</td></tr>`;
+        }
+        return `<tr><td>${row.label}</td><td class="${row.bold ? 'bold' : ''}">${row.value}</td></tr>`;
+      })
+      .join('')}</table>`;
+
+    // Grab diagram SVG if ref is provided
+    let diagramHtml: string | null = null;
+    if (diagramRef?.current) {
+      const svg = diagramRef.current.querySelector('svg');
+      if (svg) {
+        diagramHtml = new XMLSerializer().serializeToString(svg);
+      }
+    }
+
+    const html = buildPrintHtml(title, tableHtml, diagramHtml);
+
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) return;
+    printWindow.document.write(html);
+    printWindow.document.close();
+    // Wait for content to render before printing
+    printWindow.onload = () => {
+      printWindow.print();
+      printWindow.close();
+    };
+    // Fallback if onload doesn't fire
+    setTimeout(() => {
+      try {
+        printWindow.print();
+        printWindow.close();
+      } catch {
+        // window already closed
+      }
+    }, 500);
+  }, [title, rows, diagramRef]);
 
   const handleDownloadCsv = useCallback(() => {
     const csv = toCsv(title, rows);
@@ -70,7 +164,7 @@ export default function RecapSection({ title, rows, accentColor = '#0072CE' }: R
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Table size="small" sx={{ '& td': { border: 'none', py: 0.4 } }}>
+        <Table ref={tableRef} size="small" sx={{ '& td': { border: 'none', py: 0.4 } }}>
           <TableBody>
             {rows.map((row, i) =>
               row.section ? (

@@ -13,7 +13,6 @@ import NpshForm, { NPSH_DEFAULTS_IMPERIAL } from '@/components/npsh/NpshForm';
 import NpshResults from '@/components/npsh/NpshResults';
 import NpshDiagram from '@/components/npsh/NpshDiagram';
 import CalcPageHeader from '@/components/shared/CalcPageHeader';
-import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
 import RecapSection, { RecapRow } from '@/components/shared/RecapSection';
 import { NpshInputs } from '@/lib/types';
 import { calculateNpsh } from '@/lib/calculations/npsh';
@@ -27,25 +26,6 @@ export default function NpshCalculatorPage() {
   const outputs = useMemo(() => calculateNpsh(inputs), [inputs]);
   const unitLabel = inputs.unitSystem === 'imperial' ? 'ft' : 'm';
   const pressureUnit = inputs.pressureInputUnit;
-
-  const exportRows: ExportRow[] = useMemo(() => {
-    if (outputs.error) return [];
-    return [
-      { label: 'Unit System', value: inputs.unitSystem },
-      { label: 'Atmospheric Pressure', value: `${inputs.atmosphericPressure} ${pressureUnit}` },
-      { label: 'Source Pressure', value: `${inputs.sourcePressure} ${pressureUnit}` },
-      { label: 'Static Height', value: `${inputs.staticHeight} ${unitLabel}` },
-      { label: 'Friction Loss', value: `${inputs.frictionLoss} ${unitLabel}` },
-      { label: 'Vapor Pressure', value: `${inputs.vaporPressure} ${pressureUnit}` },
-      { label: 'Specific Gravity', value: String(inputs.specificGravity) },
-      { label: 'NPSHa', value: `${outputs.npsha.toFixed(2)} ${unitLabel}` },
-      { label: 'Atmospheric Head', value: `${outputs.atmosphericHead.toFixed(2)} ${unitLabel}` },
-      { label: 'Source Head', value: `${outputs.sourceHead.toFixed(2)} ${unitLabel}` },
-      { label: 'Static Head', value: `${outputs.staticHead.toFixed(2)} ${unitLabel}` },
-      { label: 'Friction Head', value: `${outputs.frictionHead.toFixed(2)} ${unitLabel}` },
-      { label: 'Vapor Head', value: `${outputs.vaporHead.toFixed(2)} ${unitLabel}` },
-    ];
-  }, [inputs, outputs, unitLabel, pressureUnit]);
 
   const recapRows: RecapRow[] = useMemo(() => {
     if (outputs.error) return [];
@@ -94,9 +74,6 @@ export default function NpshCalculatorPage() {
               <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5 }}>
                 <SectionLabel color="#00A859">Results</SectionLabel>
                 <NpshResults outputs={outputs} unitSystem={inputs.unitSystem} />
-                {!outputs.error && (
-                  <ExportBar title="NPSH Available Calculator" rows={exportRows} accentColor={ACCENT} />
-                )}
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem', lineHeight: 1.5 }}>
                   {DISCLAIMER}
                 </Typography>

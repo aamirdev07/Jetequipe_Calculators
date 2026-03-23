@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -13,7 +13,6 @@ import TankForm, { TANK_DEFAULTS_METRIC } from '@/components/tank/TankForm';
 import TankResults from '@/components/tank/TankResults';
 import TankDrawing2D from '@/components/tank/TankDrawing2D';
 import CalcPageHeader from '@/components/shared/CalcPageHeader';
-import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
 import RecapSection, { RecapRow } from '@/components/shared/RecapSection';
 import { TankInputs } from '@/lib/types';
 import { calculateTank } from '@/lib/calculations/tank';
@@ -25,26 +24,10 @@ const DISCLAIMER = 'For reference only. Results must be verified by a qualified 
 export default function TankCalculatorPage() {
   const [inputs, setInputs] = useState<TankInputs>(TANK_DEFAULTS_METRIC);
   const outputs = useMemo(() => calculateTank(inputs), [inputs]);
+  const diagramRef = useRef<HTMLDivElement>(null);
 
   const unit = inputs.unitSystem === 'metric' ? 'mm' : 'in';
   const volUnit = inputs.unitSystem === 'metric' ? 'L' : 'gal';
-
-  const exportRows: ExportRow[] = useMemo(() => {
-    if (outputs.error) return [];
-    return [
-      { label: 'Unit System', value: inputs.unitSystem },
-      { label: 'Inner Diameter', value: `${inputs.innerDiameter} ${unit}` },
-      { label: 'Total Volume', value: `${inputs.totalVolume} ${volUnit}` },
-      { label: 'Cone Angle', value: `${inputs.coneAngle}°` },
-      { label: 'Fill Percentage', value: `${inputs.fillPercentage}%` },
-      { label: 'Cone Height', value: `${outputs.coneHeight} ${unit}` },
-      { label: 'Total Height', value: `${outputs.totalHeight} ${unit}` },
-      { label: 'Liquid Height', value: `${outputs.liquidHeight} ${unit}` },
-      { label: 'H/D Ratio', value: outputs.hdRatio.toFixed(2) },
-      { label: 'Total Volume', value: `${outputs.totalVolume.toFixed(1)} ${volUnit}` },
-      { label: 'Working Volume', value: `${outputs.workingVolume.toFixed(1)} ${volUnit}` },
-    ];
-  }, [inputs, outputs, unit, volUnit]);
 
   const recapRows: RecapRow[] = useMemo(() => {
     if (outputs.error) return [];
@@ -55,6 +38,7 @@ export default function TankCalculatorPage() {
       { label: 'Cone Angle', value: `${inputs.coneAngle}°` },
       { label: 'Fill Percentage', value: `${inputs.fillPercentage}%` },
       { label: 'Results', value: '', section: true },
+      { label: 'Cylinder Height', value: `${outputs.cylinderHeight} ${unit}`, bold: true },
       { label: 'Cone Height', value: `${outputs.coneHeight} ${unit}`, bold: true },
       { label: 'Total Height', value: `${outputs.totalHeight} ${unit}`, bold: true },
       { label: 'Liquid Height', value: `${outputs.liquidHeight} ${unit}`, bold: true },
@@ -88,9 +72,6 @@ export default function TankCalculatorPage() {
               <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mt: 2.5 }}>
                 <SectionLabel color="#00A859">Results</SectionLabel>
                 <TankResults outputs={outputs} unitSystem={inputs.unitSystem} />
-                {!outputs.error && (
-                  <ExportBar title="Tank Dimension Calculator" rows={exportRows} accentColor={ACCENT} />
-                )}
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem', lineHeight: 1.5 }}>
                   {DISCLAIMER}
                 </Typography>
@@ -100,7 +81,12 @@ export default function TankCalculatorPage() {
             {!outputs.error && (
               <FadeInView delay={0.15}>
                 <Stack sx={{ mt: 2.5 }}>
-                  <RecapSection title="Tank Dimension Calculator" rows={recapRows} accentColor={ACCENT} />
+                  <RecapSection
+                    title="Tank Dimension Calculator"
+                    rows={recapRows}
+                    accentColor={ACCENT}
+                    diagramRef={diagramRef}
+                  />
                 </Stack>
               </FadeInView>
             )}
@@ -117,11 +103,13 @@ export default function TankCalculatorPage() {
                 }}
               >
                 <SectionLabel color={ACCENT}>Tank Profile</SectionLabel>
-                <TankDrawing2D
-                  outputs={outputs}
-                  innerDiameter={inputs.innerDiameter}
-                  unitSystem={inputs.unitSystem}
-                />
+                <div ref={diagramRef}>
+                  <TankDrawing2D
+                    outputs={outputs}
+                    innerDiameter={inputs.innerDiameter}
+                    unitSystem={inputs.unitSystem}
+                  />
+                </div>
               </Paper>
             </FadeInView>
           </Grid>

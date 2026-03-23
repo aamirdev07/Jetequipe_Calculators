@@ -12,7 +12,6 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import VelocityForm, { VELOCITY_DEFAULTS } from '@/components/velocity/VelocityForm';
 import VelocityResults from '@/components/velocity/VelocityResults';
 import CalcPageHeader from '@/components/shared/CalcPageHeader';
-import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
 import RecapSection, { RecapRow } from '@/components/shared/RecapSection';
 import { VelocityInputs } from '@/lib/types';
 import { PIPE_SIZES } from '@/lib/config/pipeData';
@@ -29,17 +28,6 @@ export default function FluidVelocityPage() {
   const pipeInfo = PIPE_SIZES.find((p) => p.nominal_in === inputs.nominalDiameter);
 
   const flowUnitMap: Record<string, string> = { m3h: 'm³/h', GPM: 'GPM' };
-
-  const exportRows: ExportRow[] = useMemo(() => {
-    if (outputs.error) return [];
-    return [
-      { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit] ?? inputs.flowRateUnit}` },
-      { label: 'Nominal Pipe Size', value: pipeInfo?.label ?? String(inputs.nominalDiameter) },
-      { label: 'Actual ID', value: `${pipeInfo?.id_in ?? ''}″` },
-      { label: 'Velocity', value: `${outputs.velocityMs.toFixed(2)} m/s (${outputs.velocityFts.toFixed(2)} ft/s)` },
-      { label: 'CIP Status', value: outputs.cipLabel },
-    ];
-  }, [inputs, outputs]);
 
   const recapRows: RecapRow[] = useMemo(() => {
     if (outputs.error) return [];
@@ -87,9 +75,6 @@ export default function FluidVelocityPage() {
               >
                 <SectionLabel color={ACCENT}>Results</SectionLabel>
                 <VelocityResults outputs={outputs} />
-                {!outputs.error && (
-                  <ExportBar title="Fluid Velocity Calculator" rows={exportRows} accentColor={ACCENT} />
-                )}
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem', lineHeight: 1.5 }}>
                   {DISCLAIMER}
                 </Typography>

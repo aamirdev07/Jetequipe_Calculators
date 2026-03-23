@@ -15,9 +15,7 @@ import FrictionForm, { FRICTION_DEFAULTS } from '@/components/friction/FrictionF
 import FrictionResults from '@/components/friction/FrictionResults';
 import FrictionRecap from '@/components/friction/FrictionRecap';
 import CalcPageHeader from '@/components/shared/CalcPageHeader';
-import ExportBar, { ExportRow } from '@/components/shared/ExportBar';
 import { FrictionInputs } from '@/lib/types';
-import { PIPE_SIZES } from '@/lib/config/pipeData';
 import { calculateFrictionLoss } from '@/lib/calculations/frictionLoss';
 import { FadeInView } from '@/components/shared/MotionWrapper';
 
@@ -26,33 +24,6 @@ const ACCENT = '#7C3AED';
 export default function FrictionLossPage() {
   const [inputs, setInputs] = useState<FrictionInputs>(FRICTION_DEFAULTS);
   const outputs = useMemo(() => calculateFrictionLoss(inputs), [inputs]);
-
-  const flowUnitMap: Record<string, string> = { GPM: 'GPM', LPM: 'L/min', m3h: 'm³/h' };
-  const lossUnitMap: Record<string, string> = { PSI: 'psi', FT: 'ft (head)', M: 'm (head)', BAR: 'bar' };
-  const pipeLabel = PIPE_SIZES.find((p) => p.nominal_in === inputs.nominalDiameter)?.label ?? String(inputs.nominalDiameter);
-
-  const exportRows: ExportRow[] = useMemo(() => {
-    if (outputs.error) return [];
-    return [
-      { label: 'Flow Rate', value: `${inputs.flowRate} ${flowUnitMap[inputs.flowRateUnit]}` },
-      { label: 'Viscosity', value: `${inputs.viscosity} cP` },
-      { label: 'Temperature', value: `${inputs.temperature} °C` },
-      { label: 'Specific Gravity', value: String(inputs.specificGravity) },
-      { label: 'Pipe Diameter', value: pipeLabel },
-      { label: 'Pipe Length', value: `${inputs.pipeLength} ${inputs.pipeLengthUnit}` },
-      { label: '45° Elbows', value: String(inputs.elbows45) },
-      { label: '90° Elbows', value: String(inputs.elbows90) },
-      { label: 'Ball Valves', value: String(inputs.ballValves) },
-      { label: 'Butterfly Valves', value: String(inputs.butterflyValves) },
-      { label: 'Rise', value: `${inputs.elevationChange} ${inputs.elevationUnit}` },
-      ...(inputs.additionalLoss > 0 ? [{ label: 'Additional Loss', value: `${inputs.additionalLoss} ${lossUnitMap[inputs.additionalLossUnit] ?? inputs.additionalLossUnit}` }] : []),
-      { label: 'Total Head Loss', value: `${outputs.totalHeadLossFt.toFixed(2)} ft (${outputs.totalHeadLossM.toFixed(2)} m)` },
-      { label: 'Total Pressure Loss', value: `${outputs.totalPressureLossPsi.toFixed(2)} psi (${outputs.totalPressureLossBar.toFixed(3)} bar)` },
-      { label: 'Velocity', value: `${outputs.velocityMs.toFixed(2)} m/s (${outputs.velocityFts.toFixed(2)} ft/s)` },
-      { label: 'Reynolds Number', value: outputs.reynoldsNumber.toLocaleString() },
-      { label: 'Flow Regime', value: outputs.flowRegime },
-    ];
-  }, [inputs, outputs, pipeLabel]);
 
   return (
     <>
@@ -88,9 +59,6 @@ export default function FrictionLossPage() {
               >
                 <SectionLabel color="#00A859">Results</SectionLabel>
                 <FrictionResults outputs={outputs} />
-                {!outputs.error && (
-                  <ExportBar title="Friction Loss Calculator" rows={exportRows} accentColor={ACCENT} />
-                )}
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem', lineHeight: 1.5 }}>
                   {DISCLAIMER}
                 </Typography>
