@@ -50,6 +50,7 @@ function buildPrintHtml(
   title: string,
   tableHtml: string,
   diagramHtml: string | null,
+  logoUrl: string,
 ): string {
   const disclaimer =
     'For reference only. Results must be verified by a qualified engineer. Jetequip is not responsible for the results or their interpretation or use.';
@@ -62,6 +63,8 @@ function buildPrintHtml(
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Inter, Arial, Helvetica, sans-serif; color: #1a1a2e; padding: 24px; }
+    .logo-header { text-align: center; margin-bottom: 16px; }
+    .logo-header img { height: 44px; }
     h1 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
     .subtitle { font-size: 11px; color: #666; margin-bottom: 16px; }
     .wrap { display: flex; gap: 32px; }
@@ -81,6 +84,7 @@ function buildPrintHtml(
   </style>
 </head>
 <body>
+  <div class="logo-header"><img src="${logoUrl}" alt="Jetequip"/></div>
   <h1>${title}</h1>
   <div class="subtitle">Generated ${new Date().toLocaleString()}</div>
   <div class="wrap">
@@ -121,7 +125,8 @@ export default function RecapSection({
       }
     }
 
-    const html = buildPrintHtml(title, tableHtml, diagramHtml);
+    const logoUrl = `${window.location.origin}/Jetequip-Couleur-Sans-Mention.png`;
+    const html = buildPrintHtml(title, tableHtml, diagramHtml, logoUrl);
 
     const printWindow = window.open('', '_blank', 'width=900,height=700');
     if (!printWindow) return;

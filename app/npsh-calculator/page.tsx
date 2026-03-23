@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -24,6 +24,7 @@ const DISCLAIMER = 'For reference only. Results must be verified by a qualified 
 export default function NpshCalculatorPage() {
   const [inputs, setInputs] = useState<NpshInputs>(NPSH_DEFAULTS_IMPERIAL);
   const outputs = useMemo(() => calculateNpsh(inputs), [inputs]);
+  const diagramRef = useRef<HTMLDivElement>(null);
   const unitLabel = inputs.unitSystem === 'imperial' ? 'ft' : 'm';
   const pressureUnit = inputs.pressureInputUnit;
 
@@ -83,17 +84,19 @@ export default function NpshCalculatorPage() {
             <FadeInView delay={0.15}>
               <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5 }}>
                 <SectionLabel color="#0072CE">System Diagram</SectionLabel>
-                <NpshDiagram
-                  staticHeight={inputs.staticHeight}
-                  unitLabel={unitLabel}
-                  outputs={outputs}
-                />
+                <div ref={diagramRef}>
+                  <NpshDiagram
+                    staticHeight={inputs.staticHeight}
+                    unitLabel={unitLabel}
+                    outputs={outputs}
+                  />
+                </div>
               </Paper>
             </FadeInView>
 
             {!outputs.error && (
               <FadeInView delay={0.2}>
-                <RecapSection title="NPSH Available Calculator" rows={recapRows} accentColor={ACCENT} />
+                <RecapSection title="NPSH Available Calculator" rows={recapRows} accentColor={ACCENT} diagramRef={diagramRef} />
               </FadeInView>
             )}
           </Grid>
