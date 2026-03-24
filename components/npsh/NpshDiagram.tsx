@@ -14,7 +14,8 @@ export default function NpshDiagram({ staticHeight, unitLabel, outputs }: NpshDi
   const svgWidth = 460;
   const svgHeight = 340;
 
-  const pumpAbove = staticHeight > 0;
+  // Positive = flooded (liquid above pump), Negative = suction lift (pump above liquid)
+  const pumpAbove = staticHeight < 0;
 
   // Tank position
   const tankX = 30;
@@ -201,7 +202,7 @@ export default function NpshDiagram({ staticHeight, unitLabel, outputs }: NpshDi
               fontSize="8"
               fontFamily="Inter, sans-serif"
             >
-              {pumpAbove ? 'suction lift' : 'flooded suction'}
+              {staticHeight >= 0 ? 'flooded suction' : 'suction lift'}
             </text>
           </>
         )}
@@ -252,7 +253,7 @@ export default function NpshDiagram({ staticHeight, unitLabel, outputs }: NpshDi
           fontWeight="700"
           fontFamily="Inter, sans-serif"
         >
-          NPSHa = ha + hs − Δz − hf − hvp = {outputs.npsha.toFixed(2)} {unitLabel}
+          NPSHa = ha + hs + Δz − hf − hvp = {outputs.npsha.toFixed(2)} {unitLabel}
         </text>
       </svg>
     </Stack>

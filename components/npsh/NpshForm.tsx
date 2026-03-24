@@ -1,13 +1,32 @@
 'use client';
 
-import React from 'react';
-import { Grid, MenuItem, TextField, Button, Stack, ToggleButtonGroup, ToggleButton, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import {
+  Grid,
+  Button,
+  Stack,
+  ToggleButtonGroup,
+  ToggleButton,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  alpha,
+  Chip,
+} from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UnitToggle from '@/components/shared/UnitToggle';
 import SectionTitle from '@/components/shared/SectionTitle';
 import InputField from '@/components/shared/InputField';
 import { NpshInputs, NpshPressureInputUnit, UnitSystem } from '@/lib/types';
 import { FLUID_PRESETS } from '@/lib/config/fluidData';
+
+const ACCENT = '#E65100';
 
 interface NpshFormProps {
   inputs: NpshInputs;
@@ -36,25 +55,26 @@ export const NPSH_DEFAULTS_METRIC: NpshInputs = {
   specificGravity: 1.0,
 };
 
+const CUSTOM_INDEX = FLUID_PRESETS.findIndex((p) => p.label === 'Custom');
+
 export default function NpshForm({ inputs, onChange }: NpshFormProps) {
   const isMetric = inputs.unitSystem === 'metric';
   const pressUnit = inputs.pressureInputUnit;
   const lenUnit = isMetric ? 'm' : 'ft';
+  const vpUnit = isMetric ? 'bar' : 'psi';
+
+  const [selectedFluid, setSelectedFluid] = useState<number>(0);
+  const isCustom = selectedFluid === CUSTOM_INDEX;
 
   const handleUnitChange = (newUnit: UnitSystem) => {
-    if (newUnit === 'metric') {
-      onChange(NPSH_DEFAULTS_METRIC);
-    } else {
-      onChange(NPSH_DEFAULTS_IMPERIAL);
-    }
+    setSelectedFluid(0);
+    onChange(newUnit === 'metric' ? NPSH_DEFAULTS_METRIC : NPSH_DEFAULTS_IMPERIAL);
   };
 
   const handlePressureUnitChange = (_: React.MouseEvent, newUnit: NpshPressureInputUnit | null) => {
     if (!newUnit) return;
-    // Reset to defaults with the new pressure unit
     if (isMetric) {
       if (newUnit === 'm') {
-        // Convert bar defaults to metres of head (approx: 1 bar ≈ 10.2 m / SG)
         const sg = inputs.specificGravity || 1;
         onChange({
           ...inputs,
@@ -64,12 +84,10 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
           vaporPressure: parseFloat((inputs.vaporPressure * 10.1972 / sg).toFixed(4)),
         });
       } else {
-        // bar — reset to defaults
         onChange({ ...NPSH_DEFAULTS_METRIC, specificGravity: inputs.specificGravity });
       }
     } else {
       if (newUnit === 'ft') {
-        // Convert psi to ft of head (approx: 1 psi ≈ 2.31 ft / SG)
         const sg = inputs.specificGravity || 1;
         onChange({
           ...inputs,
@@ -79,27 +97,21 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
           vaporPressure: parseFloat((inputs.vaporPressure * 2.31 / sg).toFixed(4)),
         });
       } else {
-        // psi — reset to defaults
         onChange({ ...NPSH_DEFAULTS_IMPERIAL, specificGravity: inputs.specificGravity });
       }
     }
   };
 
-  const handleFluidPreset = (index: number) => {
+  const selectPreset = (index: number) => {
+    setSelectedFluid(index);
     const preset = FLUID_PRESETS[index];
     if (preset.label === 'Custom') return;
 
     let vp: number;
-    if (pressUnit === 'psi') {
-      vp = preset.vaporPressurePsi;
-    } else if (pressUnit === 'bar') {
-      vp = preset.vaporPressureBar;
-    } else if (pressUnit === 'ft') {
-      vp = preset.vaporPressurePsi * 2.31 / preset.specificGravity;
-    } else {
-      // m
-      vp = preset.vaporPressureBar * 10.1972 / preset.specificGravity;
-    }
+    if (pressUnit === 'psi') vp = preset.vaporPressurePsi;
+    else if (pressUnit === 'bar') vp = preset.vaporPressureBar;
+    else if (pressUnit === 'ft') vp = preset.vaporPressurePsi * 2.31 / preset.specificGravity;
+    else vp = preset.vaporPressureBar * 10.1972 / preset.specificGravity;
 
     onChange({
       ...inputs,
@@ -109,12 +121,15 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
   };
 
   const handleReset = () => {
+    setSelectedFluid(0);
     onChange(isMetric ? NPSH_DEFAULTS_METRIC : NPSH_DEFAULTS_IMPERIAL);
   };
 
   const pressureOptions = isMetric
     ? [{ value: 'bar', label: 'bar' }, { value: 'm', label: 'm (head)' }]
     : [{ value: 'psi', label: 'psi' }, { value: 'ft', label: 'ft (head)' }];
+
+  const presets = FLUID_PRESETS.filter((p) => p.label !== 'Custom');
 
   return (
     <Stack spacing={0}>
@@ -132,24 +147,123 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
         </Button>
       </Stack>
 
-      <SectionTitle title="Fluid Preset" subtitle="Select a common fluid to auto-fill vapor pressure and SG" />
-      <TextField
-        select
-        label="Common Fluids"
-        fullWidth
-        size="small"
-        defaultValue=""
-        onChange={(e) => handleFluidPreset(parseInt(e.target.value))}
-        sx={{ mb: 2 }}
-      >
-        {FLUID_PRESETS.map((preset, i) => (
-          <MenuItem key={preset.label} value={i} disabled={preset.label === 'Custom'}>
-            {preset.label}
-            {preset.label !== 'Custom' && ` (VP: ${isMetric ? preset.vaporPressureBar : preset.vaporPressurePsi} ${isMetric ? 'bar' : 'psi'}, SG: ${preset.specificGravity})`}
-          </MenuItem>
-        ))}
-      </TextField>
+      {/* ── Fluid Selection via Table ── */}
+      <SectionTitle title="Fluid Properties" subtitle="Select a fluid to set vapor pressure and specific gravity" />
+      <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ bgcolor: alpha(ACCENT, 0.06) }}>
+              <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', width: 28 }} />
+              <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Fluid</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>VP ({vpUnit})</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>SG</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {presets.map((preset, i) => {
+              const active = selectedFluid === i;
+              return (
+                <TableRow
+                  key={preset.label}
+                  hover
+                  onClick={() => selectPreset(i)}
+                  sx={{
+                    cursor: 'pointer',
+                    bgcolor: active ? alpha(ACCENT, 0.07) : 'transparent',
+                    '&:hover': { bgcolor: active ? alpha(ACCENT, 0.1) : alpha('#000', 0.03) },
+                    transition: 'background-color 0.15s',
+                  }}
+                >
+                  <TableCell sx={{ py: 0.5, px: 1, width: 28 }}>
+                    {active && <CheckCircleIcon sx={{ fontSize: 16, color: ACCENT }} />}
+                  </TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', py: 0.5, fontWeight: active ? 600 : 400 }}>
+                    {preset.label}
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{ fontSize: '0.8rem', py: 0.5, fontWeight: active ? 700 : 400 }}
+                  >
+                    {isMetric ? preset.vaporPressureBar : preset.vaporPressurePsi}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem', py: 0.5 }}>
+                    {preset.specificGravity}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {/* Custom row */}
+            <TableRow
+              hover
+              onClick={() => selectPreset(CUSTOM_INDEX)}
+              sx={{
+                cursor: 'pointer',
+                bgcolor: isCustom ? alpha(ACCENT, 0.07) : 'transparent',
+                '&:hover': { bgcolor: isCustom ? alpha(ACCENT, 0.1) : alpha('#000', 0.03) },
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                transition: 'background-color 0.15s',
+              }}
+            >
+              <TableCell sx={{ py: 0.5, px: 1, width: 28 }}>
+                {isCustom && <CheckCircleIcon sx={{ fontSize: 16, color: ACCENT }} />}
+              </TableCell>
+              <TableCell sx={{ fontSize: '0.8rem', py: 0.5, fontWeight: isCustom ? 600 : 400, fontStyle: isCustom ? 'normal' : 'italic' }}>
+                Custom fluid
+              </TableCell>
+              <TableCell align="right" sx={{ fontSize: '0.8rem', py: 0.5, color: isCustom ? 'text.primary' : 'text.disabled' }}>
+                {isCustom ? inputs.vaporPressure : '—'}
+              </TableCell>
+              <TableCell align="right" sx={{ fontSize: '0.8rem', py: 0.5, color: isCustom ? 'text.primary' : 'text.disabled' }}>
+                {isCustom ? inputs.specificGravity : '—'}
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
 
+      {/* Custom fluid inputs — only when custom is selected */}
+      {isCustom && (
+        <Grid container spacing={1.5} sx={{ mb: 1 }}>
+          <Grid item xs={6}>
+            <InputField
+              label="Vapor Pressure"
+              value={inputs.vaporPressure}
+              onChange={(v) => onChange({ ...inputs, vaporPressure: v })}
+              unit={pressUnit}
+              min={0}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <InputField
+              label="Specific Gravity"
+              value={inputs.specificGravity}
+              onChange={(v) => onChange({ ...inputs, specificGravity: v })}
+              min={0}
+              error={inputs.specificGravity <= 0}
+              helperText={inputs.specificGravity <= 0 ? 'Must be > 0' : ''}
+            />
+          </Grid>
+        </Grid>
+      )}
+
+      {/* Show selected values as a chip when using a preset */}
+      {!isCustom && (
+        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+          <Chip
+            size="small"
+            label={`VP: ${inputs.vaporPressure} ${pressUnit}`}
+            sx={{ fontSize: '0.75rem', bgcolor: alpha(ACCENT, 0.08), fontWeight: 500 }}
+          />
+          <Chip
+            size="small"
+            label={`SG: ${inputs.specificGravity}`}
+            sx={{ fontSize: '0.75rem', bgcolor: alpha(ACCENT, 0.08), fontWeight: 500 }}
+          />
+        </Stack>
+      )}
+
+      {/* ── System Pressures ── */}
       <SectionTitle title="System Pressures" />
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.75rem' }}>
@@ -189,6 +303,7 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
         </Grid>
       </Grid>
 
+      {/* ── Suction Line ── */}
       <SectionTitle title="Suction Line" />
       <Grid container spacing={1.5}>
         <Grid item xs={12}>
@@ -197,7 +312,7 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
             value={inputs.staticHeight}
             onChange={(v) => onChange({ ...inputs, staticHeight: v })}
             unit={lenUnit}
-            helperText="Positive = suction lift, Negative = flooded"
+            helperText="Positive = flooded, Negative = suction lift"
           />
         </Grid>
         <Grid item xs={12}>
@@ -207,29 +322,6 @@ export default function NpshForm({ inputs, onChange }: NpshFormProps) {
             onChange={(v) => onChange({ ...inputs, frictionLoss: v })}
             unit={lenUnit}
             min={0}
-          />
-        </Grid>
-      </Grid>
-
-      <SectionTitle title="Fluid Properties" />
-      <Grid container spacing={1.5}>
-        <Grid item xs={6}>
-          <InputField
-            label="Vapor Pressure"
-            value={inputs.vaporPressure}
-            onChange={(v) => onChange({ ...inputs, vaporPressure: v })}
-            unit={pressUnit}
-            min={0}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <InputField
-            label="Specific Gravity"
-            value={inputs.specificGravity}
-            onChange={(v) => onChange({ ...inputs, specificGravity: v })}
-            min={0}
-            error={inputs.specificGravity <= 0}
-            helperText={inputs.specificGravity <= 0 ? 'Must be > 0' : ''}
           />
         </Grid>
       </Grid>

@@ -35,14 +35,14 @@ export function calculateNpsh(inputs: NpshInputs): NpshOutputs {
       hvp = psiToHeadFt(vaporPressure, specificGravity);
     }
 
-    // Static head: positive staticHeight = pump above liquid (suction lift, subtract)
-    const hs = hs_source - staticHeight;
+    // Static head: positive = flooded suction (adds to NPSHa), negative = suction lift (subtracts)
+    const hz = staticHeight;
 
     // Friction loss in suction pipe (already in ft)
     const hf = frictionLoss;
 
-    // NPSHa = ha + hs - hf - hvp
-    const npsha = ha + hs - hf - hvp;
+    // NPSHa = ha + hs_source + hz - hf - hvp
+    const npsha = ha + hs_source + hz - hf - hvp;
 
     const riskInfo = getRiskLevel(npsha);
 
@@ -50,7 +50,7 @@ export function calculateNpsh(inputs: NpshInputs): NpshOutputs {
       npsha: parseFloat(npsha.toFixed(2)),
       atmosphericHead: parseFloat(ha.toFixed(2)),
       sourceHead: parseFloat(hs_source.toFixed(2)),
-      staticHead: parseFloat((-staticHeight).toFixed(2)),
+      staticHead: parseFloat(hz.toFixed(2)),
       frictionHead: parseFloat(hf.toFixed(2)),
       vaporHead: parseFloat(hvp.toFixed(2)),
       ...riskInfo,
@@ -74,14 +74,14 @@ export function calculateNpsh(inputs: NpshInputs): NpshOutputs {
       hvp = barToHeadM(vaporPressure, specificGravity);
     }
 
-    // Static head in metres
-    const hs = hs_source - staticHeight;
+    // Static head: positive = flooded suction (adds), negative = suction lift (subtracts)
+    const hz = staticHeight;
 
     // Friction loss (already in m)
     const hf = frictionLoss;
 
-    // NPSHa
-    const npsha = ha + hs - hf - hvp;
+    // NPSHa = ha + hs_source + hz - hf - hvp
+    const npsha = ha + hs_source + hz - hf - hvp;
 
     // Convert to ft for risk assessment
     const npsha_ft = mToFt(npsha);
@@ -91,7 +91,7 @@ export function calculateNpsh(inputs: NpshInputs): NpshOutputs {
       npsha: parseFloat(npsha.toFixed(2)),
       atmosphericHead: parseFloat(ha.toFixed(2)),
       sourceHead: parseFloat(hs_source.toFixed(2)),
-      staticHead: parseFloat((-staticHeight).toFixed(2)),
+      staticHead: parseFloat(hz.toFixed(2)),
       frictionHead: parseFloat(hf.toFixed(2)),
       vaporHead: parseFloat(hvp.toFixed(2)),
       ...riskInfo,
